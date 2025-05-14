@@ -3,7 +3,7 @@ import MyStyles from '../../styles/MyStyles';
 import { Ionicons } from '@expo/vector-icons';
 import { iconItems } from '../constant/Icon';
 
-const Home = () => {
+const Home = ({ navigation }) => {
   return (
     <View style={{flex:1}}>
      <StatusBar barStyle="light-content"/>
@@ -14,10 +14,10 @@ const Home = () => {
             <Text style={MyStyles.title}>HEALIO</Text>
             <Text style={MyStyles.subtitle}>Sổ tay quản lý sức khoẻ</Text>
             <View style={MyStyles.buttonContainer}>
-              <TouchableOpacity style={[MyStyles.button, MyStyles.registerButton]}>
+              <TouchableOpacity style={[MyStyles.button, MyStyles.registerButton]} onPress={() => navigation.navigate('Register')}>
                 <Text style={MyStyles.buttonText}>Đăng ký</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[MyStyles.button, MyStyles.loginButton]}>
+              <TouchableOpacity style={[MyStyles.button, MyStyles.loginButton]} onPress={() => navigation.navigate('Login')}>
                 <Text style={MyStyles.buttonText2}>Đăng nhập</Text>
               </TouchableOpacity>
             </View>

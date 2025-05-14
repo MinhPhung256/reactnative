@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { View, TouchableOpacity} from "react-native"
 import { TextInput } from "react-native-paper"
-import * as ImagePicker from "expo-image-picker"
 import MyStyles from '../../styles/MyStyles';
 import { Text } from "react-native";
 
@@ -47,7 +46,7 @@ const register = () =>{
                                 secureTextEntry={i.secureTextEntry}
                                 right={<TextInput.Icon icon={i.icon} />}
             />)}
-            <TouchableOpacity>
+            <TouchableOpacity style={MyStyles.margin} onPress={picker}>
                 <Text>Chọn ảnh đại diện...</Text>
             </TouchableOpacity>
             
