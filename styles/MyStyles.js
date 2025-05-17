@@ -8,7 +8,10 @@ export default StyleSheet.create({
     
     margin:{
       margin: 20
+    },
 
+    p:{
+      padding:20
     },
 
     header: {

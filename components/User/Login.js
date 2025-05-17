@@ -1,137 +1,122 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Image } from 'react-native';
-import { Menu, Provider, TextInput as PaperInput } from 'react-native-paper';
+import { useState } from "react";
+import Apis, { endpoints, authApis } from "../../configs/Apis";
+import { ScrollView} from "react-native"
+import { TextInput, Button, HelperText } from "react-native-paper"
+import MyStyles from '../../styles/MyStyles';
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-export default function LoginScreen({ navigation }) {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [mode, setMode] = useState('personal');
-  const [visible, setVisible] = useState(false);
+const Login = () =>{
+    const info = [{
+            label: 'Tên đăng nhập',
+            field: 'username',
+            secureTextEntry: false,
+            icon: "account"
+        },
+        {
+            label: 'Mật khẩu',
+            field: 'password',
+            secureTextEntry: true,
+            icon: "lock"
+        }];
 
-  const openMenu = () => setVisible(true);
-  const closeMenu = () => setVisible(false);
+    const [user, setUser] = useState({});
+    const [msg, setMsg] = useState();
+    const [loading, setLoading] = useState(false);
+    const nav =useNavigation();
 
-  const handleLogin = () => {
-    if (username && password) {
-      const user = {
-        id: '123',
-        username,
-        role: 'user',
-        isConnectedToExpert: mode === 'connect',
-      };
-      navigation.navigate('Home', { user });
-    } else {
-      alert('Vui lòng nhập đầy đủ thông tin');
+    const setState = (value, field) => {
+        setUser({...user, [field]: value});
     }
-  };
 
-  return (
-    <Provider>
-      <View style={styles.logoContainer}>
-                  <Image source={require("../../assets/Images/logo1.jpg")} style={styles.logo} />
-                  <Text style={styles.title}>HEALIO</Text>
-                  <Text style={styles.subtitle}>Chào mừng bạn đến với chúng tôi</Text>
-     
-      <View style={styles.container}>
 
-        <TextInput
-          style={styles.input}
-          placeholder="Tên người dùng"
-          value={username}
-          onChangeText={setUsername}
-        />
-
-        <TextInput
-          style={styles.input}
-          placeholder="Mật khẩu"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-
-        <Text style={styles.label}>Chế độ sử dụng:</Text>
-
-        <Menu
-          visible={visible}
-          onDismiss={closeMenu}
-          anchor={
-            <TouchableOpacity onPress={openMenu}>
-              <PaperInput
-                mode="outlined"
-                label="Chọn chế độ"
-                value={mode === 'personal' ? 'Tự theo dõi' : 'Kết nối với chuyên gia'}
-                editable={false}
-                right={<PaperInput.Icon icon="menu-down" />}
-              />
-            </TouchableOpacity>
+    const validate = () => {
+        if (Object.values(user).length === 0) {
+            setMsg("Vui lòng nhập thông tin!");
+            return false;
+        }
+    
+        for (let i of info) {
+            let val = user[i.field] || '';
+            if (val.trim() === '') {
+                setMsg(`Vui lòng nhập ${i.label}`);
+                return false;
+            }
+    
+            if (i.field === 'username' && val.includes(' ')) {
+                setMsg("Tên đăng nhập không được chứa khoảng trắng");
+                return false;
+            }
           }
-        >
-          <Menu.Item
-            onPress={() => {
-              setMode('personal');
-              closeMenu();
-            }}
-            title="Tự theo dõi"
-          />
-          <Menu.Item
-            onPress={() => {
-              setMode('connect');
-              closeMenu();
-            }}
-            title="Kết nối với chuyên gia"
-          />
-        </Menu>
+    
+        setMsg("");
+        return true;
+    };
 
-        <Button title="Đăng nhập" onPress={handleLogin} />
-      </View>
-      </View>
-    </Provider>
-  );
-}
 
-const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    flex: 1,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: 'center',
-    fontWeight: 'bold',
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 12,
-    borderColor: '#B00000',
-  },
-  label: {
-    marginTop: 12,
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 8,
-  },
-  logoContainer: {
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'white',
-    borderRadius: 20,
-    margin:20,
-    borderColor: '#BB0000',
-    borderWidth:1,
-  },
-  subtitle: {
-    fontSize: 20,
-    color: '#757575',
-  },
-  logo: {
-    width: 70,
-    height: 70,
-    marginRight: 10,
-    borderRadius: 50,
-  },
-});
+    const login = async () => {
+        if(validate() === true) {
+            try{
+                setLoading(true);
+
+                let res = await Apis.post(endpoints['login'], {
+                  ...user,
+                  client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
+                  client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
+                  grant_type: "password",
+                });
+                await AsyncStorage.setItem('token', res.data.access_token);         
+                
+                let u = await authApis(res.data.access_token).get(endpoints['current_user']);
+                console.info(u.data);
+
+                nav.navigate("Home");  // đổi "Home" thành tên màn hình bạn muốn tới
+
+            } catch (ex) {
+              setMsg("Đăng nhập thất bại, vui lòng kiểm tra lại thông tin!");
+              console.error(ex);
+            } finally {
+              setLoading(false);
+            }
+          }
+        };
+      
+        return (
+          <ScrollView style={MyStyles.p}>
+            <HelperText type="error" visible={!!msg}>{msg}</HelperText>
+            {info.map(i => (
+              <TextInput
+                key={i.field}
+                value={user[i.field] || ''}
+                onChangeText={t => setState(t, i.field)}
+                label={i.label}
+                secureTextEntry={i.secureTextEntry}
+                right={<TextInput.Icon icon={i.icon} />}
+                style={[MyStyles.margin, {
+                  backgroundColor: 'white',
+                  borderRadius: 10,
+                  fontSize: 16
+                }]}
+                theme={{
+                  colors: {
+                    text: '#B00000',
+                    primary: '#B00000',
+                    placeholder: 'gray',
+                  }
+                }}
+              />
+            ))}
+            <Button
+              style={{ backgroundColor: "#B00000" }}
+              disabled={loading}
+              loading={loading}
+              onPress={login}
+              mode="contained"
+            >
+              Đăng nhập
+            </Button>
+          </ScrollView>
+        );
+      };
+      
+      export default Login;
