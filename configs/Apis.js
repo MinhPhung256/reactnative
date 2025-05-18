@@ -1,80 +1,80 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.134:8000/';
+const BASE_URL = 'http://10.17.67.93:8000/';
 
 export const endpoints = {
   'login': '/o/token/',
-  'register': '/users/register/',
+  'register': '/users/',
 
-   //activity
-   'activity_list': '/activity/',                    
-   'activity_create': '/activity/',                  
-   'activity_read': (actId) => `/activity/${actId}/`,    
-   'activity_update': (actId) => `/activity/${actId}/`,    
-   'activity_partial_update': (actId) => `/activity/${actId}/`,  
-   'activity_delete': (actId) => `/activity/${actId}/`,  
+   // activity
+'activity-list': '/activity/',
+'activity-create': '/activity/',
+'activity-read': (actId) => `/activity/${actId}/`,
+'activity-update': (actId) => `/activity/${actId}/`,
+'activity-partial-update': (actId) => `/activity/${actId}/`,
+'activity-delete': (actId) => `/activity/${actId}/`,  
 
-  // chatmessage
-  'chatmessage_list': '/chatmessage/',
-  'chatmessage_create': '/chatmessage/',
-  'chatmessage_read': (chatId) =>`/chatmessage/${chatId}/`,
-  'chatmessage_update': (chatId) =>`/chatmessage/${chatId}/`,
-  'chatmessage_partial_update': (chatId) =>`/chatmessage/${chatId}/`,
-  'chatmessage_delete': (chatId) =>`/chatmessage/${chatId}/`,
+// chatmessage
+'chatmessage-list': '/chatmessage/',
+'chatmessage-create': '/chatmessage/',
+'chatmessage-read': (chatId) => `/chatmessage/${chatId}/`,
+'chatmessage-update': (chatId) => `/chatmessage/${chatId}/`,
+'chatmessage-partial-update': (chatId) => `/chatmessage/${chatId}/`,
+'chatmessage-delete': (chatId) => `/chatmessage/${chatId}/`,
 
-  // connection
-  'connection_list': '/connection/',
-  'connection_create': '/connection/',
-  'connection_read': (conId) =>`/connection/${conId}/`,
-  'connection_update': (conId) =>`/connection/${conId}/`,
-  'connection_partial_update': (conId) =>`/connection/${conId}/`,
-  'connection_delete': (conId) =>`/connection/${conId}/`,
+// connection
+'connection-list': '/connection/',
+'connection-create': '/connection/',
+'connection-read': (conId) => `/connection/${conId}/`,
+'connection-update': (conId) => `/connection/${conId}/`,
+'connection-partial-update': (conId) => `/connection/${conId}/`,
+'connection-delete': (conId) => `/connection/${conId}/`,
 
-  // goal
-  'goal_list': '/goal/',
-  'goal_create': '/goal/',
-  'goal_read': (goalId) => `/goal/${goalId}/`,
-  'goal_update': (goalId) => `/goal/${goalId}/`,
-  'goal_partial_update': (goalId) => `/goal/${goalId}/`,
-  'goal_delete': (goalId) => `/goal/${goalId}/`,
-  
-  // healthdiary
-  'healthdiary_list': '/healthdiary/',
-  'healthdiary_create': '/healthdiary/',
-  'healthdiary_read': (diaryId) => `/healthdiary/${diaryId}/`,
-  'healthdiary_update': (diaryId) => `/healthdiary/${diaryId}/`,
-  'healthdiary_partial_update': (diaryId) => `/healthdiary/${diaryId}/`,
-  'healthdiary_delete': (diaryId) => `/healthdiary/${diaryId}/`,
+// goal
+'goal-list': '/goal/',
+'goal-create': '/goal/',
+'goal-read': (goalId) => `/goal/${goalId}/`,
+'goal-update': (goalId) => `/goal/${goalId}/`,
+'goal-partial-update': (goalId) => `/goal/${goalId}/`,
+'goal-delete': (goalId) => `/goal/${goalId}/`,
 
-   //healthrecord
-    'healthrecord_list': '/healthrecord/',
-    'healthrecord_create': '/healthrecord/',
-    'healthrecord_read': (recordId) => `/healthrecord/${recordId}/`,
-    'healthrecord_update': (recordId) => `/healthrecord/${recordId}/`,
-    'healthrecord_partial_update': (recordId) => `/healthrecord/${recordId}/`,
-    'healthrecord_delete': (recordId) => `/healthrecord/${recordId}/`,
+// healthdiary
+'healthdiary-list': '/healthdiary/',
+'healthdiary-create': '/healthdiary/',
+'healthdiary-read': (diaryId) => `/healthdiary/${diaryId}/`,
+'healthdiary-update': (diaryId) => `/healthdiary/${diaryId}/`,
+'healthdiary-partial-update': (diaryId) => `/healthdiary/${diaryId}/`,
+'healthdiary-delete': (diaryId) => `/healthdiary/${diaryId}/`,
 
-    //tag
-    'tag_list': '/tag/',
-    'tag_create': '/tag/',
-    'tag_read': (tagId) => `/tag/${tagId}/`,
-    'tag_update': (tagId) => `/tag/${tagId}/`,
-    'tag_partial_update': (tagId) => `/tag/${tagId}/`,
-    'tag_delete': (tagId) => `/tag/${tagId}/`,
+// healthrecord
+'healthrecord-list': '/healthrecord/',
+'healthrecord-create': '/healthrecord/',
+'healthrecord-read': (recordId) => `/healthrecord/${recordId}/`,
+'healthrecord-update': (recordId) => `/healthrecord/${recordId}/`,
+'healthrecord-partial-update': (recordId) => `/healthrecord/${recordId}/`,
+'healthrecord-delete': (recordId) => `/healthrecord/${recordId}/`,
 
-    //user
-    'users_create': '/users/',
-    'get_all_users': '/users/all-users/',
-    'change_password': '/users/change-password/',
-    'current_user': '/users/current/',   
+// tag
+'tag-list': '/tag/',
+'tag-create': '/tag/',
+'tag-read': (tagId) => `/tag/${tagId}/`,
+'tag-update': (tagId) => `/tag/${tagId}/`,
+'tag-partial-update': (tagId) => `/tag/${tagId}/`,
+'tag-delete': (tagId) => `/tag/${tagId}/`,
 
-    //
-    'workoutplan_list': '/workoutplan/',
-    'workoutplan_create': '/workoutplan/',
-    'workoutplan_read': (planId) => `/workoutplan/${planId}/`,
-    'workoutplan_update': (planId) => `/workoutplan/${planId}/`,
-    'workoutplan_partial_update': (planId) => `/workoutplan/${planId}/`,
-    'workoutplan_delete': (planId) => `/workoutplan/${planId}/`,
+// user
+// 'users-create': '/users/',
+'get-all-users': '/users/all-users/',
+'change-password': '/users/change-password/',
+'current-user': '/users/current/',
+
+// workoutplan
+'workoutplan-list': '/workoutplan/',
+'workoutplan-create': '/workoutplan/',
+'workoutplan-read': (planId) => `/workoutplan/${planId}/`,
+'workoutplan-update': (planId) => `/workoutplan/${planId}/`,
+'workoutplan-partial-update': (planId) => `/workoutplan/${planId}/`,
+'workoutplan-delete': (planId) => `/workoutplan/${planId}/`,
 };
 
 export const authApis = (token) => {

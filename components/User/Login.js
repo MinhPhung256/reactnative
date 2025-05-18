@@ -5,6 +5,7 @@ import { TextInput, Button, HelperText } from "react-native-paper"
 import MyStyles from '../../styles/MyStyles';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import qs from 'qs';
 
 const Login = () =>{
     const info = [{
@@ -59,15 +60,25 @@ const Login = () =>{
             try{
                 setLoading(true);
 
-                let res = await Apis.post(endpoints['login'], {
-                  ...user,
+                let res = await Apis.post(
+                  endpoints['login'],
+                  qs.stringify({
+                  // ...user,
+                  username: user.username,
+                  password: user.password,
                   client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
                   client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
                   grant_type: "password",
-                });
+                }),
+                {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                  }
+                }
+              );
                 await AsyncStorage.setItem('token', res.data.access_token);         
                 
-                let u = await authApis(res.data.access_token).get(endpoints['current_user']);
+                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
                 console.info(u.data);
 
                 nav.navigate("Home");  // đổi "Home" thành tên màn hình bạn muốn tới

@@ -105,10 +105,10 @@ const Register = () =>{
             }
         }
     
-        if (user.role !== '0' && user.role !== '1') {
-            setMsg("Vui lòng chọn vai trò");
-            return false;
-        }
+        // if (user.role !== '0' && user.role !== '1') {
+        //     setMsg("Vui lòng chọn vai trò");
+        //     return false;
+        // }
     
         setMsg("");
         return true;
@@ -123,18 +123,23 @@ const Register = () =>{
                 let form = new FormData();
                 for (let key in user) {
                     if (key === 'confirm_password') continue;
-                    if (key === 'avatar') {
+                    if (key === 'avatar' && user.avatar?.uri) {
                         form.append('avatar', {
                             uri: user.avatar.uri,
                             name: user.avatar.fileName || 'avatar.jpg',
                             type: user.avatar.type || 'image/jpeg'
-                        });
+                          });                      
+                    } else if (key === 'role') {
+                        form.append('role', parseInt(user.role)); 
                     } else {
                         form.append(key, user[key]);
                     }
                 }
                 
-                console.log("Form Data:", form);
+                // console.log("Form Data:", form);
+                for (let pair of form.entries()) {
+                    console.log(`${pair[0]}: ${pair[1]}`);
+                  }
 
                 let res = await Apis.post(endpoints['register'], form, {
                     headers: {
@@ -142,8 +147,9 @@ const Register = () =>{
                     }
                 });
 
-                if(res.status === 201)
+                if (res.status === 200 || res.status === 201)
                     nav.navigate('login');
+                  
 
 
 
