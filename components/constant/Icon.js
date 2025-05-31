@@ -1,6 +1,26 @@
 export const iconItems = [
-  { icon: 'dumbbell', text: 'Tập luyện', screen: 'WorkoutScreen' },
-  { icon: 'food-apple', text: 'Dinh dưỡng', screen: 'MealScreen' },
-  { icon: 'chart-bar', text: 'Thống kê', screen: 'StatsScreen' },
-  { icon: 'calculator-variant', text: 'Tính BMI', screen: 'BMIScreen' },
+  {
+    icon: 'heart',
+    text: 'Theo dõi sức khỏe',
+    screen: 'HealthDemo',
+    requiresLogin: true,
+  },
+  {
+    icon: 'food-apple',
+    text: 'Gợi ý dinh dưỡng',
+    screen: 'NutritionDemo',
+    requiresLogin: false,
+  },
+  {
+    icon: 'calendar-clock',
+    text: 'Lịch tập mẫu',
+    screen: 'WorkoutPlanDemo',
+    requiresLogin: false,
+  },
+  {
+    icon: 'chat',
+    text: 'Chat với chuyên gia',
+    screen: 'ChatScreen',
+    requiresLogin: true,
+  },
 ];

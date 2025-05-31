@@ -64,6 +64,7 @@ export default StyleSheet.create({
       subtitle: {
         fontSize: 16,
         color: '#757575',
+        marginTop:10
       },
       buttonContainer: {
         flexDirection: 'row',
@@ -135,7 +136,6 @@ export default StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#BB0000',
         backgroundColor: 'white',
-        // paddingBottom:50,
         position: 'absolute', 
         bottom: 0,
         left: 0,
@@ -160,5 +160,84 @@ export default StyleSheet.create({
         borderWidth:1,
         color:'white'
       },
+
+      featureHeader: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        marginLeft: 16,
+        marginVertical: 10,
+        color: '#B00000',
+      },
+      featureGrid: {
+        flexDirection: 'row',
+        flexWrap: 'wrap',
+        justifyContent: 'center',
+      },
+      sectionTitle: {
+        color: '#B00000',
+        textAlign: 'center',
+        margin: 20,
+        fontWeight: 'bold',
+      },
+
+      section: {
+        marginBottom: 24,
+        paddingHorizontal: 16,
+      },
+      card: {
+        marginBottom: 12,
+        backgroundColor: '#F5F5F5',
+        borderRadius: 8,
+        elevation: 2,
+      },
+      chatButton: {
+        marginTop: 10,
+        borderColor: '#B00000',
+        color: '#B00000'
+      },
+      roleButtons: {
+        flexDirection: 'column',
+        gap: 10,
+      },
+      roleButton: {
+        padding: 12,
+        backgroundColor: '#E1F5FE',
+        borderRadius: 8,
+        marginVertical: 6,
+      },
+      roleText: {
+        textAlign: 'center',
+        fontWeight: '500',
+        color: 'white',
+      },
+      faqItem: {
+        fontSize: 14,
+        color: '#444',
+        marginBottom: 4,
+      },
+      footer: {
+        borderTopWidth: 1,
+        borderTopColor: '#B00000',
+        paddingTop: 12,
+        marginTop: 16,
+        paddingHorizontal: 16,
+      },
+      footerText: {
+        textAlign: 'center',
+        fontSize: 13,
+        color: '#888',
+        marginBottom: 4,
+      },
+      // footer: {
+      //   alignItems: 'center',
+      //   marginTop: 20,
+      //   marginBottom: 30,
+      // },
+      // footerText: {
+      //   color: '#757575',
+      //   fontSize: 14,
+      // },
+    
+      
 
     });

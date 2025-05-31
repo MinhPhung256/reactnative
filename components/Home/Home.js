@@ -1,32 +1,24 @@
 import React from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar, SafeAreaView } from 'react-native';
+import { Card, Button } from 'react-native-paper';
+import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar, SafeAreaView, Alert} from 'react-native';
 import MyStyles from '../../styles/MyStyles';
 import { Icon } from 'react-native-paper';
 import { iconItems } from '../constant/Icon';
 import ActivityList from '../ActivityList';
+// import { StyleSheet } from 'react-native';
+
 
 const Home = ({ navigation }) => {
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
       <StatusBar barStyle="light-content" />
-      <ScrollView style={{ marginBottom: 80 }}>
+      <ScrollView>
         <View style={MyStyles.logoContainer}>
           <Image source={require('../../assets/Images/logo1.jpg')} style={MyStyles.logo} />
           <Text style={MyStyles.title}>HEALIO</Text>
-          <Text style={MyStyles.subtitle}>Sổ tay quản lý sức khoẻ</Text>
+          <Text style={MyStyles.subtitle}>Chào mừng bạn đã quay trở lại</Text>
           <View style={MyStyles.buttonContainer}>
-            <TouchableOpacity
-              style={[MyStyles.button, MyStyles.registerButton]}
-              onPress={() => navigation.navigate('Register')}
-            >
-              <Text style={MyStyles.buttonText}>Đăng ký</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={[MyStyles.button, MyStyles.loginButton]}
-              onPress={() => navigation.navigate('Login')}
-            >
-              <Text style={MyStyles.buttonText2}>Đăng nhập</Text>
-            </TouchableOpacity>
           </View>
         </View>
 
@@ -35,7 +27,7 @@ const Home = ({ navigation }) => {
             <TouchableOpacity
               key={index}
               style={MyStyles.featureItem}
-              onPress={() => navigation.navigate(item.screen)}
+              onPress={() => handleFeaturePress(item.screen, item.requiresLogin)}
             >
               <View style={[MyStyles.iconCircle, { backgroundColor: '#FFEBEE' }]}>
                 <Icon source={item.icon} size={30} color="#BB0000" />
@@ -44,11 +36,17 @@ const Home = ({ navigation }) => {
             </TouchableOpacity>
           ))}
         </View>
-
-        <ActivityList navigation={navigation} />
+        
+        <View>
+          <Text style={{ color: '#B00000', textAlign: 'center', margin: 20 }}>
+            ------- Gợi ý các hoạt động -------
+          </Text>
+          <ActivityList navigation={navigation} />
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default Home;
+

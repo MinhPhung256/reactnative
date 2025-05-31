@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Apis, { endpoints, authApis } from "../../configs/Apis";
-import { ScrollView} from "react-native"
+import { KeyboardAvoidingView, ScrollView, Text} from "react-native"
 import { TextInput, Button, HelperText } from "react-native-paper"
 import MyStyles from '../../styles/MyStyles';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import qs from 'qs';
+import { MyDispatchContext } from "../../configs/UserContext";
 
 const Login = () =>{
     const info = [{
@@ -24,6 +25,7 @@ const Login = () =>{
     const [user, setUser] = useState({});
     const [msg, setMsg] = useState();
     const [loading, setLoading] = useState(false);
+    const dispatch = useContext(MyDispatchContext);
     const nav =useNavigation();
 
     const setState = (value, field) => {
@@ -63,9 +65,7 @@ const Login = () =>{
                 let res = await Apis.post(
                   endpoints['login'],
                   qs.stringify({
-                  // ...user,
-                  username: user.username,
-                  password: user.password,
+                  ...user,
                   client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
                   client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
                   grant_type: "password",
@@ -81,7 +81,13 @@ const Login = () =>{
                 let u = await authApis(res.data.access_token).get(endpoints['current-user']);
                 console.info(u.data);
 
-                nav.navigate("Home");  // đổi "Home" thành tên màn hình bạn muốn tới
+                dispatch({
+                  "type": "login",
+                  "payload": u.data
+                });
+
+
+                nav.navigate("HomeStack");  // đổi "Home" thành tên màn hình bạn muốn tới
 
             } catch (ex) {
               setMsg("Đăng nhập thất bại, vui lòng kiểm tra lại thông tin!");
@@ -93,7 +99,8 @@ const Login = () =>{
         };
       
         return (
-          <ScrollView style={MyStyles.p}>
+          <KeyboardAvoidingView>
+            <ScrollView style={MyStyles.p}>
             <HelperText type="error" visible={!!msg}>{msg}</HelperText>
             {info.map(i => (
               <TextInput
@@ -126,7 +133,18 @@ const Login = () =>{
             >
               Đăng nhập
             </Button>
+              <HelperText type="info" style={{ textAlign: 'center', marginTop: 20 }}>
+                Nếu bạn chưa có tài khoản, hãy{" "}
+                <Text
+                  style={{ color: '#B00000', fontWeight: 'bold' }}
+                  onPress={() => nav.navigate("Register")}  
+                >
+                  Đăng ký
+                </Text>
+            </HelperText>
           </ScrollView>
+          </KeyboardAvoidingView>
+          
         );
       };
       

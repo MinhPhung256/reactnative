@@ -33,7 +33,7 @@ const LeftContent = icon => props => <Avatar.Icon {...props} icon={icon} backgro
 
 const ActivityCard = ({ activity, onPress }) => (
   <TouchableOpacity onPress={() => onPress(activity)}>
-    <Card style={{ marginVertical: 8, marginHorizontal: 16, backgroundColor:'#FFEBEE' }}>
+    <Card style={{ marginBlock: 8, marginInline: 16, backgroundColor:'#FFEBEE' }}>
       <Card.Title title={activity.title} subtitle={activity.subtitle} left={LeftContent(activity.icon)} style={{color:'#B00000'}}/>
       <Card.Content>
         <Text variant="titleLarge">{activity.title}</Text>
@@ -41,8 +41,8 @@ const ActivityCard = ({ activity, onPress }) => (
       </Card.Content>
       <Card.Cover source={{ uri: activity.image }} />
       <Card.Actions>
-        <Button onPress={() => console.log('Cancel clicked')} labelStyle={{ color: '#B00000' }}>Cancel</Button>
-        <Button style={{backgroundColor:'#B00000'}} onPress={() => onPress(activity)}>Xem</Button>
+        {/* <Button onPress={() => console.log('Cancel clicked')} labelStyle={{ color: '#B00000' }}>Cancel</Button> */}
+        <Button style={{backgroundColor:'#B00000'}} labelStyle={{ color: 'white' }} onPress={() => onPress(activity)}>Xem</Button>
       </Card.Actions>
     </Card>
   </TouchableOpacity>
@@ -60,7 +60,7 @@ const ActivityList = ({ navigation }) => {
     };
   
     return (
-      <View style={{ paddingVertical: 16 }}>
+      <View style={{  }}>
         {activities.map(activity => (
           <ActivityCard key={activity.id} activity={activity} onPress={onActivityPress} />
         ))}

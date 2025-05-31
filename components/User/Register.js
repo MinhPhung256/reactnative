@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Apis, { endpoints } from "../../configs/Apis";
-import { TouchableOpacity, Image, ScrollView, Text} from "react-native"
+import { TouchableOpacity, Image, ScrollView, Text, KeyboardAvoidingView} from "react-native"
 import { TextInput, Button, HelperText, RadioButton } from "react-native-paper"
 import MyStyles from '../../styles/MyStyles';
 import * as ImagePicker from 'expo-image-picker';
@@ -9,24 +9,6 @@ import { useNavigation } from "@react-navigation/native";
 
 const Register = () =>{
     const info = [{
-            label: 'Tên',
-            field: 'first_name',
-            secureTextEntry: false,
-            icon: "text"
-        },
-        {
-            label: 'Họ và tên lót',
-            field: 'last_name',
-            secureTextEntry: false,
-            icon: "text"
-        },
-        {
-            label: 'Email',
-            field: 'email',
-            secureTextEntry: false,
-            icon: "email"
-        },
-        {
             label: 'Tên đăng nhập',
             field: 'username',
             secureTextEntry: false,
@@ -44,10 +26,28 @@ const Register = () =>{
             secureTextEntry: true,
             icon: "lock-check"
 
-        }];
+        },
+        {
+            label: 'Tên',
+            field: 'first_name',
+            secureTextEntry: false,
+            icon: "text"
+        },
+        {
+            label: 'Họ và tên lót',
+            field: 'last_name',
+            secureTextEntry: false,
+            icon: "text"
+        },
+        {
+            label: 'Email',
+            field: 'email',
+            secureTextEntry: false,
+            icon: "email"
+        },];
 
     const [user, setUser] = useState({});
-    const [msg, setMsg] = useState();
+    const [msg, setMsg] = useState(null);
     const [loading, setLoading] = useState(false);
     const nav =useNavigation();
 
@@ -61,8 +61,7 @@ const Register = () =>{
         if (status !== 'granted') {
             alert("Permissions denied!");
         } else {
-            const result =
-                await ImagePicker.launchImageLibraryAsync();
+            const result = await ImagePicker.launchImageLibraryAsync();
             if (!result.canceled)
                 setState(result.assets[0], 'avatar');
             }
@@ -122,9 +121,9 @@ const Register = () =>{
 
                 let form = new FormData();
                 for (let key in user) {
-                    if (key === 'confirm_password') continue;
-                    if (key === 'avatar' && user.avatar?.uri) {
-                        form.append('avatar', {
+                    if (key !== 'confirm_password')
+                    if (key === 'avatar' && user.avatar!== null) {
+                        form.append(key, {
                             uri: user.avatar.uri,
                             name: user.avatar.fileName || 'avatar.jpg',
                             type: user.avatar.type || 'image/jpeg'
@@ -154,9 +153,13 @@ const Register = () =>{
 
 
             }catch (ex) {
-                console.error(ex);
-            
-                const err = ex.response?.data;
+                if (ex.response) {
+                    console.error("RESPONSE ERROR", ex.response.data);
+                } else if (ex.request) {
+                    console.error("NO RESPONSE RECEIVED", ex.request);
+                } else {
+                    console.error("GENERAL ERROR", ex.message);
+                }
             
                 setMsg(
                     err?.username?.[0] ||
@@ -175,7 +178,8 @@ const Register = () =>{
     }
    
     return (
-        <ScrollView style={MyStyles.p}>
+        <KeyboardAvoidingView>
+            <ScrollView style={MyStyles.p}>
             <HelperText type ="error" visible={msg}>{msg}</HelperText>
             {info.map(i => <TextInput
                                           key={i.field}
@@ -191,9 +195,9 @@ const Register = () =>{
                                           }]}
                                           theme={{
                                             colors: {
-                                              text: '#B00000',            // chữ người nhập
-                                              primary: '#B00000',         // viền khi focus + label khi focus
-                                              placeholder: 'gray',    // gợi ý khi chưa nhập
+                                              text: '#B00000',            
+                                              primary: '#B00000',         
+                                              placeholder: 'gray',   
                                             }
                                           }}
                           />)}
@@ -209,6 +213,8 @@ const Register = () =>{
             <Button style={{backgroundColor:"#B00000"}} disabled={loading} loading ={loading} onPress={register}mode="contained">Đăng ký</Button>
             
         </ScrollView>
+        </KeyboardAvoidingView>
+        
     );
 }
 export default Register;
