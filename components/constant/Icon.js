@@ -8,18 +8,18 @@ export const iconItems = [
   {
     icon: 'food-apple',
     text: 'Gợi ý dinh dưỡng',
-    screen: 'NutritionDemo',
+    screen: 'MealPlan',
     requiresLogin: false,
   },
   {
     icon: 'calendar-clock',
     text: 'Lịch tập mẫu',
-    screen: 'WorkoutPlanDemo',
+    screen: 'WorkoutPlan',
     requiresLogin: false,
   },
   {
-    icon: 'chat',
-    text: 'Chat với chuyên gia',
+    icon: 'star-outline',
+    text: 'Thử thách bản thân',
     screen: 'ChatScreen',
     requiresLogin: true,
   },

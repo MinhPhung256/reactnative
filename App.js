@@ -1,21 +1,25 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { Icon, IconButton } from "react-native-paper";
+import { Provider as PaperProvider } from 'react-native-paper';
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { MyDispatchContext, MyUserContext } from "./configs/UserContext";
+import { useContext, useReducer } from "react";
 import Home from "./components/Home/Home";
 import Login from "./components/User/Login";
 import Register from "./components/User/Register";
 import Dashboard from "./components/Home/Dashboard";
 import ActivityDetail from "./components/ActivityDetail";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import { MyDispatchContext, MyUserContext } from "./configs/UserContext";
-import { useContext, useReducer } from "react";
 import MyUserReducer from "./configs/UserReducer";
 import ChooseRole from "./components/User/ChooseRole";
 import BMICalculator from "./components/BMI";
 import Profile from "./components/User/Profile";
-import HealthDiary from "./components/HealthDiary";
-import Statistics from "./components/Statistics";
-import Reminders from "./components/Reminders"
+import HealthDiary from "./components/User1/HealthDiary";
+import Statistics from "./components/User1/Statistics";
+import Reminders from "./components/User1/Reminders"
+import PersonalInfoScreen from "./components/User1/HealthDemo";
+import MealPlan from "./components/MealPlan";
+import WorkoutPlan from "./components/WorkoutPlan";
 
 const Stack = createNativeStackNavigator();
 
@@ -60,6 +64,10 @@ const HomeStack = () => {
       <Stack.Screen name="Login" component={Login} options={{ title: "ĐĂNG NHẬP", headerBackTitleVisible: false,}}/>
       <Stack.Screen name="Register" component={Register} options={{ title: "ĐĂNG KÝ"}}/>
       <Stack.Screen name="BMICalculator" component={BMICalculator} options={{title: "TÍNH BMI"}}/>
+      <Stack.Screen name="HealthDemo" component={PersonalInfoScreen} options={{title: "THEO DÕI SỨC KHOẺ"}}/>
+      <Stack.Screen name="MealPlan" component={MealPlan} options={{title: "THỰC ĐƠN DINH DƯỠNG"}}/>
+      <Stack.Screen name="WorkoutPlan" component={WorkoutPlan} options={{title: "THỰC ĐƠN DINH DƯỠNG"}}/>
+
 
     </Stack.Navigator>
   );
@@ -152,13 +160,15 @@ const TabNavigator = () => {
 const App = () =>{
   const [user, dispatch] = useReducer(MyUserReducer, null);
   return (
-    <MyUserContext.Provider value = {user}>
-      <MyDispatchContext.Provider value = {dispatch }>
-        <NavigationContainer>
-         <TabNavigator/>
-        </NavigationContainer>
-       </MyDispatchContext.Provider>
-     </MyUserContext.Provider>
+    <PaperProvider> {/* ✅ Bọc cả app trong Provider */}
+      <MyUserContext.Provider value={user}>
+        <MyDispatchContext.Provider value={dispatch}>
+          <NavigationContainer>
+            <TabNavigator />
+          </NavigationContainer>
+        </MyDispatchContext.Provider>
+      </MyUserContext.Provider>
+    </PaperProvider>
     
   );
 

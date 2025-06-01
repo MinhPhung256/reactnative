@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { View, Platform } from 'react-native';
-import { Switch, Button, Text, Divider } from 'react-native-paper';
+import { View, Platform, ScrollView } from 'react-native';
+import { Switch, Button, Text, Divider, RadioButton, Card, IconButton } from 'react-native-paper';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import * as Notifications from 'expo-notifications';
 
@@ -8,6 +8,8 @@ const ReminderScreen = () => {
   const [useDefault, setUseDefault] = useState(false);
   const [time, setTime] = useState(new Date());
   const [showPicker, setShowPicker] = useState(false);
+  const [reminderType, setReminderType] = useState('water');
+  const [customReminders, setCustomReminders] = useState([]);
 
   const toggleUseDefault = async () => {
     setUseDefault(!useDefault);
@@ -24,11 +26,22 @@ const ReminderScreen = () => {
     setTime(currentDate);
   };
 
+  const getReminderLabel = (type) => {
+    switch (type) {
+      case 'water': return '💧 Nhắc nhở uống nước';
+      case 'workout': return '🏃 Nhắc nhở tập luyện';
+      case 'rest': return '😴 Nhắc nhở nghỉ ngơi';
+      default: return '';
+    }
+  };
+
   const scheduleCustomReminder = async () => {
-    await Notifications.scheduleNotificationAsync({
+    const title = getReminderLabel(reminderType);
+
+    const notificationId = await Notifications.scheduleNotificationAsync({
       content: {
-        title: '🔔 Nhắc nhở cá nhân',
-        body: 'Đến giờ bạn đã đặt!',
+        title,
+        body: `Đến giờ cho: ${title}`,
       },
       trigger: {
         hour: time.getHours(),
@@ -36,7 +49,21 @@ const ReminderScreen = () => {
         repeats: true,
       },
     });
+
+    const newReminder = {
+      id: Date.now(),
+      type: reminderType,
+      time: `${time.getHours()}:${time.getMinutes().toString().padStart(2, '0')}`,
+      notificationId,
+    };
+    setCustomReminders([...customReminders, newReminder]);
+
     alert('Đã đặt nhắc nhở tuỳ chỉnh!');
+  };
+
+  const deleteReminder = async (id, notificationId) => {
+    await Notifications.cancelScheduledNotificationAsync(notificationId);
+    setCustomReminders(customReminders.filter((r) => r.id !== id));
   };
 
   const scheduleDefaultReminders = async () => {
@@ -56,7 +83,7 @@ const ReminderScreen = () => {
   };
 
   return (
-    <View style={{ padding: 20 }}>
+    <ScrollView contentContainerStyle={{ padding: 20 }}>
       <Text variant="titleLarge" style={{ marginBottom: 16 }}>🔔 Cài đặt Nhắc Nhở</Text>
 
       <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
@@ -66,8 +93,15 @@ const ReminderScreen = () => {
 
       <Divider style={{ marginVertical: 20 }} />
 
-      <Text style={{ marginBottom: 8 }}>⏰ Chọn giờ nhắc nhở cá nhân:</Text>
-      <Button mode="outlined" onPress={() => setShowPicker(true)}>
+      <Text style={{ marginBottom: 8 }}>🔧 Loại nhắc nhở:</Text>
+      <RadioButton.Group onValueChange={setReminderType} value={reminderType}>
+        <RadioButton.Item label="💧 Uống nước" value="water" />
+        <RadioButton.Item label="🏃 Tập luyện" value="workout" />
+        <RadioButton.Item label="😴 Nghỉ ngơi" value="rest" />
+      </RadioButton.Group>
+
+      <Text style={{ marginTop: 16 }}>⏰ Chọn giờ nhắc nhở:</Text>
+      <Button mode="outlined" onPress={() => setShowPicker(true)} style={{ marginTop: 8 }}>
         Chọn thời gian
       </Button>
 
@@ -88,7 +122,25 @@ const ReminderScreen = () => {
       <Button mode="contained" onPress={scheduleCustomReminder}>
         Đặt nhắc nhở tuỳ chỉnh
       </Button>
-    </View>
+
+      <Divider style={{ marginVertical: 24 }} />
+
+      <Text variant="titleMedium" style={{ marginBottom: 12 }}>📋 Danh sách nhắc nhở đã đặt</Text>
+      {customReminders.map((reminder) => (
+        <Card key={reminder.id} style={{ marginBottom: 12, padding: 12 }}>
+          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <View>
+              <Text>{getReminderLabel(reminder.type)}</Text>
+              <Text>🕒 Lúc: {reminder.time}</Text>
+            </View>
+            <IconButton
+              icon="delete"
+              onPress={() => deleteReminder(reminder.id, reminder.notificationId)}
+            />
+          </View>
+        </Card>
+      ))}
+    </ScrollView>
   );
 };
 

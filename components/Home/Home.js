@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card, Button } from 'react-native-paper';
+// import { Card, Button } from 'react-native-paper';
 import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar, SafeAreaView, Alert} from 'react-native';
 import MyStyles from '../../styles/MyStyles';
 import { Icon } from 'react-native-paper';
@@ -27,7 +27,7 @@ const Home = ({ navigation }) => {
             <TouchableOpacity
               key={index}
               style={MyStyles.featureItem}
-              onPress={() => handleFeaturePress(item.screen, item.requiresLogin)}
+              onPress={() => navigation.navigate(item.screen)}
             >
               <View style={[MyStyles.iconCircle, { backgroundColor: '#FFEBEE' }]}>
                 <Icon source={item.icon} size={30} color="#BB0000" />
