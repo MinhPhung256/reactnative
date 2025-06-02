@@ -5,7 +5,7 @@ import MyStyles from '../../styles/MyStyles';
 
 
 const  Dashboard = ({ navigation }) => {
-  const handleProtectedFeature = () => {
+  const feature = () => {
     Alert.alert('Thông báo', 'Vui lòng đăng nhập để sử dụng tính năng này');
   };
 
@@ -61,7 +61,7 @@ const  Dashboard = ({ navigation }) => {
           <Card.Title title="Chat với chuyên gia dinh dưỡng" />
           <Card.Content>
             <Text>Tính năng này yêu cầu đăng nhập</Text>
-            <Button mode="outlined" onPress={handleProtectedFeature} style={MyStyles.chatButton} labelStyle={{ color: '#B00000' }}>
+            <Button mode="outlined" onPress={feature} style={MyStyles.chatButton} labelStyle={{ color: '#B00000' }}>
               Trò chuyện ngay
             </Button>
           </Card.Content>
@@ -83,15 +83,10 @@ const  Dashboard = ({ navigation }) => {
             onPress={() => navigation.navigate('Register', { role: 'expert' })}
           >
             <Text style={MyStyles.roleText}>Tôi là chuyên gia</Text>
-          </TouchableOpacity>
+          </TouchableOpacity>                                                                                   
         </View>
       </View>
 
-      {/* Footer
-      <View style={MyStyles.footer}>
-        <Text style={MyStyles.footerText}>Liên hệ: healio@gmail.com</Text>
-        <Text style={MyStyles.footerText}>Hỗ trợ | Điều khoản sử dụng</Text>
-      </View> */}
       </ScrollView>
     </SafeAreaView>
   );

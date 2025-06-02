@@ -7,6 +7,7 @@ const WorkoutPlan = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [workouts, setWorkouts] = useState({});
   const [customWorkout, setCustomWorkout] = useState('');
+  
   const [dialogVisible, setDialogVisible] = useState(false);
 
   const suggestedWorkouts = ['Chạy bộ 30 phút', 'Chống đẩy 3 hiệp', 'Gập bụng 15 phút'];
@@ -59,7 +60,10 @@ const WorkoutPlan = () => {
           ))}
         </View>
       ) : (
-        <Text style={{ marginTop: 20, color: 'gray' }}>Vui lòng chọn ngày để xem hoặc thêm bài tập</Text>
+        <View>
+            <Text style={{ marginTop: 20, color: 'gray' }}>Vui lòng chọn ngày để xem hoặc thêm bài tập</Text>
+        </View>
+        
       )}
 
       <Portal>

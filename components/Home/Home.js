@@ -1,11 +1,9 @@
 import React from 'react';
-// import { Card, Button } from 'react-native-paper';
 import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar, SafeAreaView, Alert} from 'react-native';
 import MyStyles from '../../styles/MyStyles';
-import { Icon } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { iconItems } from '../constant/Icon';
 import ActivityList from '../ActivityList';
-// import { StyleSheet } from 'react-native';
 
 
 const Home = ({ navigation }) => {
@@ -30,7 +28,7 @@ const Home = ({ navigation }) => {
               onPress={() => navigation.navigate(item.screen)}
             >
               <View style={[MyStyles.iconCircle, { backgroundColor: '#FFEBEE' }]}>
-                <Icon source={item.icon} size={30} color="#BB0000" />
+              <MaterialCommunityIcons name={item.icon} size={30} color="#BB0000" />
               </View>
               <Text style={MyStyles.featureText}>{item.text}</Text>
             </TouchableOpacity>

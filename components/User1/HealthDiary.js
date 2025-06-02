@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, ScrollView, KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
 import { TextInput, Button, Text, Card, IconButton } from 'react-native-paper';
+import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { endpoints, authApis } from '../../configs/Apis';
 
@@ -10,19 +11,59 @@ const HealthDiary = () => {
   const [feeling, setFeeling] = useState('');
   const [editId, setEditId] = useState(null);
   const styles = getStyles();
+  const [diary, setDiary]= useState([]);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const token = await AsyncStorage.getItem('access_token');
+  //       const res = await authApis(token).get(endpoints['healthdiary-list']);
+  //       setEntries(res.data);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const res = await axios.get('http://192.168.3.22:8000/healthdiary/');
+  //       setEntries(res.data);
+  //     } catch (err) {
+  //       console.error(err);
+  //     }
+  //   };
+  //   fetchData();
+  // }, []);
+
+  const loadDiary = async () =>{
+    try {
+      const token = await AsyncStorage.getItem('access_token');
+      if(!token) {
+        throw new Error('No token found');
+      }
+
+      let res = await authApis(token).get(endpoints["healthdiary-list"])
+      console.log("Diary:", res.data);
+      if (res.data) {
+        setDiary(res.data);
+      }
+    } catch (ex) {
+      console.error("Error loading diarys:", ex);
+      console.log("Error details:", ex.response?.data);
+      setDiary([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const token = await AsyncStorage.getItem('access_token');
-        const res = await authApis(token).get(endpoints['healthdiary-list']);
-        setEntries(res.data);
-      } catch (err) {
-        console.error(err);
-      }
-    };
-    fetchData();
+    loadDiary();
   }, []);
+
+
 
   const addEntry = () => {
     if (!text.trim()) {
@@ -111,7 +152,7 @@ const HealthDiary = () => {
           <Text style={styles.emptyText}>Bạn chưa có nhật ký nào.</Text>
         )}
 
-        {entries.map(({ id, date, content, feeling }) => (
+        {/* {entries.map(({ id, date, content, feeling }) => (
           <Card key={id} style={styles.card}>
             <View style={styles.cardHeader}>
               <Text style={styles.dateText}>{new Date(date).toLocaleString()}</Text>
@@ -123,7 +164,7 @@ const HealthDiary = () => {
             <Text style={styles.cardContent}>{content}</Text>
             <Text style={styles.cardFeeling}>Cảm xúc: {feeling}</Text>
           </Card>
-        ))}
+        ))} */}
       </ScrollView>
     </KeyboardAvoidingView>
   );

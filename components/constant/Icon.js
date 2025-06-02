@@ -9,13 +9,13 @@ export const iconItems = [
     icon: 'food-apple',
     text: 'Gợi ý dinh dưỡng',
     screen: 'MealPlan',
-    requiresLogin: false,
+    requiresLogin: true,
   },
   {
     icon: 'calendar-clock',
     text: 'Lịch tập mẫu',
     screen: 'WorkoutPlan',
-    requiresLogin: false,
+    requiresLogin: true,
   },
   {
     icon: 'star-outline',

@@ -8,7 +8,25 @@ import { useNavigation } from "@react-navigation/native";
 
 
 const Register = () =>{
-    const info = [{
+    const info = [
+        {
+            label: 'Tên',
+            field: 'first_name',
+            secureTextEntry: false,
+            icon: "text"
+        },
+        {
+            label: 'Họ và tên lót',
+            field: 'last_name',
+            secureTextEntry: false,
+            icon: "text"
+        },
+        {
+            label: 'Email',
+            field: 'email',
+            secureTextEntry: false,
+            icon: "email"
+        },{
             label: 'Tên đăng nhập',
             field: 'username',
             secureTextEntry: false,
@@ -27,29 +45,12 @@ const Register = () =>{
             icon: "lock-check"
 
         },
-        {
-            label: 'Tên',
-            field: 'first_name',
-            secureTextEntry: false,
-            icon: "text"
-        },
-        {
-            label: 'Họ và tên lót',
-            field: 'last_name',
-            secureTextEntry: false,
-            icon: "text"
-        },
-        {
-            label: 'Email',
-            field: 'email',
-            secureTextEntry: false,
-            icon: "email"
-        },];
+        ];
 
     const [user, setUser] = useState({});
     const [msg, setMsg] = useState(null);
     const [loading, setLoading] = useState(false);
-    const nav =useNavigation();
+    const nav = useNavigation();
 
     const setState = (value, field) => {
         setUser({...user, [field]: value});
@@ -72,6 +73,12 @@ const Register = () =>{
             setMsg("Vui lòng nhập thông tin!");
             return false;
         }
+
+        if(user.password !== user.confirm_password){
+            setMsg('Mật khẩu và xác nhận mật khẩu không khớp!');
+            return false;
+        }
+
     
         for (let i of info) {
             const val = user[i.field]; 
@@ -80,14 +87,10 @@ const Register = () =>{
                 return false;
             }
 
-            if(user.password !== user.confirm_password){
-                setMsg('Mật khẩu và xác nhận mật khẩu không khớp!');
-                return false;
-            }
-    
+            
             if (i.field === 'email') {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                if (!emailRegex.test(val)) {
+                const emailTest = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailTest.test(val)) {
                     setMsg("Email không hợp lệ");
                     return false;
                 }
@@ -104,10 +107,10 @@ const Register = () =>{
             }
         }
     
-        // if (user.role !== '0' && user.role !== '1') {
-        //     setMsg("Vui lòng chọn vai trò");
-        //     return false;
-        // }
+            if (user.role !== '0' && user.role !== '1') {
+                setMsg("Vui lòng chọn vai trò");
+                return false;
+            }
     
         setMsg("");
         return true;
@@ -121,9 +124,10 @@ const Register = () =>{
 
                 let form = new FormData();
                 for (let key in user) {
-                    if (key !== 'confirm_password')
-                    if (key === 'avatar' && user.avatar!== null) {
-                        form.append(key, {
+                    form.append('confirm_password', user.confirm_password);
+
+                    if (key === 'avatar') {
+                        form.append('avatar', {
                             uri: user.avatar.uri,
                             name: user.avatar.fileName || 'avatar.jpg',
                             type: user.avatar.type || 'image/jpeg'
@@ -135,7 +139,6 @@ const Register = () =>{
                     }
                 }
                 
-                // console.log("Form Data:", form);
                 for (let pair of form.entries()) {
                     console.log(`${pair[0]}: ${pair[1]}`);
                   }
@@ -147,7 +150,7 @@ const Register = () =>{
                 });
 
                 if (res.status === 200 || res.status === 201)
-                    nav.navigate('login');
+                    nav.navigate('Login');
                   
 
 
@@ -218,3 +221,4 @@ const Register = () =>{
     );
 }
 export default Register;
+

@@ -1,12 +1,11 @@
-import { useContext, useState } from "react";
+import { useState } from "react";
 import Apis, { endpoints, authApis } from "../../configs/Apis";
-import { KeyboardAvoidingView, ScrollView, Text} from "react-native"
+import { ScrollView} from "react-native"
 import { TextInput, Button, HelperText } from "react-native-paper"
 import MyStyles from '../../styles/MyStyles';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import qs from 'qs';
-import { MyDispatchContext } from "../../configs/UserContext";
 
 const Login = () =>{
     const info = [{
@@ -25,7 +24,6 @@ const Login = () =>{
     const [user, setUser] = useState({});
     const [msg, setMsg] = useState();
     const [loading, setLoading] = useState(false);
-    const dispatch = useContext(MyDispatchContext);
     const nav =useNavigation();
 
     const setState = (value, field) => {
@@ -42,7 +40,7 @@ const Login = () =>{
         for (let i of info) {
             let val = user[i.field] || '';
             if (val.trim() === '') {
-                setMsg(`Vui lòng nhập ${i.label}`);
+              setMsg(`Vui lòng nhập ${i.label}`);
                 return false;
             }
     
@@ -62,36 +60,34 @@ const Login = () =>{
             try{
                 setLoading(true);
 
-                let res = await Apis.post(
-                  endpoints['login'],
-                  qs.stringify({
+                let form = qs.stringify({
                   ...user,
                   client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
                   client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
-                  grant_type: "password",
-                }),
-                {
-                  headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                  }
-                }
-              );
-                await AsyncStorage.setItem('token', res.data.access_token);         
-                
-                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
-                console.info(u.data);
-
-                dispatch({
-                  "type": "login",
-                  "payload": u.data
+                  grant_type: "password"
                 });
 
+                let res = await Apis.post(endpoints['login'], form, {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  }
+                });
+                await AsyncStorage.setItem('token', res.data.access_token);         
+                
+                let u = await authApis(res.data.access_token).get(endpoints['current_user']);
+                console.info(u.data);
 
-                nav.navigate("HomeStack");  // đổi "Home" thành tên màn hình bạn muốn tới
-
-            } catch (ex) {
-              setMsg("Đăng nhập thất bại, vui lòng kiểm tra lại thông tin!");
-              console.error(ex);
+                nav.navigate("HomeStack");  
+            }  catch (ex) {
+              if (ex.response) {
+       
+                console.error('Error response:', ex.response);
+                setMsg(ex.response.data.message || "Đăng nhập thất bại, vui lòng kiểm tra lại thông tin!");
+              } else {
+       
+                console.error('Error message:', ex.message);
+                setMsg("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+              }
             } finally {
               setLoading(false);
             }
@@ -99,8 +95,7 @@ const Login = () =>{
         };
       
         return (
-          <KeyboardAvoidingView>
-            <ScrollView style={MyStyles.p}>
+          <ScrollView style={MyStyles.p}>
             <HelperText type="error" visible={!!msg}>{msg}</HelperText>
             {info.map(i => (
               <TextInput
@@ -133,18 +128,7 @@ const Login = () =>{
             >
               Đăng nhập
             </Button>
-              <HelperText type="info" style={{ textAlign: 'center', marginTop: 20 }}>
-                Nếu bạn chưa có tài khoản, hãy{" "}
-                <Text
-                  style={{ color: '#B00000', fontWeight: 'bold' }}
-                  onPress={() => nav.navigate("Register")}  
-                >
-                  Đăng ký
-                </Text>
-            </HelperText>
           </ScrollView>
-          </KeyboardAvoidingView>
-          
         );
       };
       
