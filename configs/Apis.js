@@ -1,10 +1,10 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.134:8000/';
+const BASE_URL = 'http://172.20.10.3:8000/';
 
 export const endpoints = {
   'login': '/o/token/',
-  'register': '/users/register/',
+  'register': '/users/',
 
    //activity
    'activity_list': '/activity/',                    
@@ -66,7 +66,8 @@ export const endpoints = {
     'users_create': '/users/',
     'get_all_users': '/users/all-users/',
     'change_password': '/users/change-password/',
-    'current_user': '/users/current/',   
+    'current_user': '/users/current/',
+    'update_info': '/users/update-info/',
 
     //
     'workoutplan_list': '/workoutplan/',

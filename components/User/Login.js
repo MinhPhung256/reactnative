@@ -5,6 +5,7 @@ import { TextInput, Button, HelperText } from "react-native-paper"
 import MyStyles from '../../styles/MyStyles';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import qs from 'qs';
 
 const Login = () =>{
     const info = [{
@@ -57,13 +58,19 @@ const Login = () =>{
     const login = async () => {
         if(validate() === true) {
             try{
-                setLoading(true);
+                setLoading(true); // nếu bạn chưa cài, hãy chạy: npm install qs
 
-                let res = await Apis.post(endpoints['login'], {
+                let form = qs.stringify({
                   ...user,
                   client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
                   client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
-                  grant_type: "password",
+                  grant_type: "password"
+                });
+
+                let res = await Apis.post(endpoints['login'], form, {
+                  headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                  }
                 });
                 await AsyncStorage.setItem('token', res.data.access_token);         
                 
@@ -71,10 +78,16 @@ const Login = () =>{
                 console.info(u.data);
 
                 nav.navigate("Home");  // đổi "Home" thành tên màn hình bạn muốn tới
-
-            } catch (ex) {
-              setMsg("Đăng nhập thất bại, vui lòng kiểm tra lại thông tin!");
-              console.error(ex);
+            }  catch (ex) {
+              if (ex.response) {
+        // Lỗi từ server (ví dụ: 400, 401...)
+                console.error('Error response:', ex.response);
+                setMsg(ex.response.data.message || "Đăng nhập thất bại, vui lòng kiểm tra lại thông tin!");
+              } else {
+        // Lỗi mạng hoặc lỗi không rõ ràng
+                console.error('Error message:', ex.message);
+                setMsg("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+              }
             } finally {
               setLoading(false);
             }

@@ -122,13 +122,16 @@ const Register = () =>{
 
                 let form = new FormData();
                 for (let key in user) {
-                    if (key === 'confirm_password') continue;
+                    form.append('confirm_password', user.confirm_password);
+
                     if (key === 'avatar') {
                         form.append('avatar', {
                             uri: user.avatar.uri,
                             name: user.avatar.fileName || 'avatar.jpg',
                             type: user.avatar.type || 'image/jpeg'
                         });
+                    } else if (key === 'role') {
+                        form.append('role', parseInt(user.role));  //  ép kiểu chính xác tại đây
                     } else {
                         form.append(key, user[key]);
                     }
@@ -143,12 +146,13 @@ const Register = () =>{
                 });
 
                 if(res.status === 201)
-                    nav.navigate('login');
+                    nav.navigate('Login');
 
 
 
             }catch (ex) {
                 console.error(ex);
+                console.log("Chi tiết lỗi từ server:", ex.response?.data);
             
                 const err = ex.response?.data;
             
