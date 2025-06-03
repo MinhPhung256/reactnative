@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
-const RoleSelectionModal = ({ visible, onClose }) => {
+const ChooseRole = ({ visible, onClose, currentRole }) => {
   const [selectedRole, setSelectedRole] = useState(null);
   const navigation = useNavigation();
 
@@ -11,9 +11,8 @@ const RoleSelectionModal = ({ visible, onClose }) => {
 
     onClose();
 
-    // Điều hướng theo vai trò
-    if (selectedRole === 'user') {
-      navigation.navigate('UserTabs');
+    if (selectedRole === currentRole) {
+      return;
     } else if (selectedRole === 'expert') {
       navigation.navigate('ExpertTabs');
     }
@@ -77,7 +76,7 @@ const RoleSelectionModal = ({ visible, onClose }) => {
   );
 };
 
-export default RoleSelectionModal;
+export default ChooseRole;
 
 const styles = StyleSheet.create({
   overlay: {

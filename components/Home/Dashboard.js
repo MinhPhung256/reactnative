@@ -36,29 +36,29 @@ const  Dashboard = ({ navigation }) => {
         <View style={MyStyles.section}>
         <Text style={MyStyles.sectionTitle}>----- Tính năng nổi bật -----</Text>
 
-        <Card style={MyStyles.card}>
-          <Card.Title title="Gợi ý tập luyện" />
+        <Card style={MyStyles.card} >
+          <Card.Title titleStyle={{ fontWeight: 'bold' }} title="Gợi ý tập luyện" />
           <Card.Content>
-            <Text>Bài tập được cá nhân hóa dựa trên mục tiêu và thể trạng</Text>
+            <Text>Bài tập được cá nhân hóa dựa trên mục tiêu và thể trạng cơ thể</Text>
           </Card.Content>
         </Card>
 
         <Card style={MyStyles.card}>
-          <Card.Title title="Dinh dưỡng phù hợp mục tiêu" />
+          <Card.Title titleStyle={{ fontWeight: 'bold' }} title="Dinh dưỡng phù hợp mục tiêu" />
           <Card.Content>
             <Text>Gợi ý thực đơn cho tăng cơ, giảm cân, hoặc duy trì sức khỏe</Text>
           </Card.Content>
         </Card>
 
         <Card style={MyStyles.card}>
-          <Card.Title title="Nhắc nhở thông minh" />
+          <Card.Title titleStyle={{ fontWeight: 'bold' }} title="Nhắc nhở thông minh" />
           <Card.Content>
             <Text>Thông báo uống nước, nghỉ ngơi, luyện tập đúng giờ</Text>
           </Card.Content>
         </Card>
 
         <Card style={MyStyles.card}>
-          <Card.Title title="Chat với chuyên gia dinh dưỡng" />
+          <Card.Title titleStyle={{ fontWeight: 'bold' }} title="Chat với chuyên gia dinh dưỡng" />
           <Card.Content>
             <Text>Tính năng này yêu cầu đăng nhập</Text>
             <Button mode="outlined" onPress={feature} style={MyStyles.chatButton} labelStyle={{ color: '#B00000' }}>

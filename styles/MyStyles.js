@@ -39,7 +39,7 @@ export default StyleSheet.create({
         marginLeft: 10
       },
 
-    logoContainer: {
+      logoContainer: {
         alignItems: 'center',
         padding: 20,
         backgroundColor: 'white',

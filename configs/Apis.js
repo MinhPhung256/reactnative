@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://172.20.10.2:8000/';
+const BASE_URL = 'http://192.168.3.22:8000/';
 
 export const endpoints = {
   'login': '/o/token/', 
@@ -63,10 +63,11 @@ export const endpoints = {
 'tag-delete': (tagId) => `/tag/${tagId}/`,
 
 // user
-// 'users-create': '/users/',
 'get-all-users': '/users/all-users/',
 'change-password': '/users/change-password/',
 'current-user': '/users/current/',
+'read-user': (userId) => `/users/${userId}/`,
+'update-user': (userId) => `/users/${userId}/update-info/`,
 
 // workoutplan
 'workoutplan-list': '/workoutplan/',
@@ -75,6 +76,46 @@ export const endpoints = {
 'workoutplan-update': (planId) => `/workoutplan/${planId}/`,
 'workoutplan-partial-update': (planId) => `/workoutplan/${planId}/`,
 'workoutplan-delete': (planId) => `/workoutplan/${planId}/`,
+};
+
+
+
+// 1. Lấy thông tin user hiện tại
+export const getCurrentUser = async (token) => {
+  try {
+    const api = authApis(token);
+    const response = await api.get(endpoints['current-user']);
+    return response.data;  // trả về object user
+  } catch (error) {
+    console.error('Lỗi lấy profile:', error);
+    throw error;
+  }
+};
+
+// 2. Kết nối chuyên gia (tạo connection mới)
+export const connectExpert = async (token, expertId) => {
+  try {
+    const api = authApis(token);
+    // giả sử API connection-create nhận { expert_id }
+    const response = await api.post(endpoints['connection-create'], { expert_id: expertId });
+    return response.data;  // trả về connection mới
+  } catch (error) {
+    console.error('Lỗi kết nối chuyên gia:', error);
+    throw error;
+  }
+};
+
+// 3. Ngắt kết nối chuyên gia (xóa connection theo id)
+export const disconnectExpert = async (token, connectionId) => {
+  try {
+    const api = authApis(token);
+    const url = endpoints['connection-delete'](connectionId);
+    await api.delete(url);
+    return true;
+  } catch (error) {
+    console.error('Lỗi ngắt kết nối chuyên gia:', error);
+    throw error;
+  }
 };
 
 export const authApis = (token) => {

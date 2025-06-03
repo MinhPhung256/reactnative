@@ -1,58 +1,37 @@
 import React, { useState, useEffect } from 'react';
-import { View, ScrollView, KeyboardAvoidingView, Platform, Alert, StyleSheet } from 'react-native';
+import { ScrollView, KeyboardAvoidingView, Platform, Alert, StyleSheet, View, ActivityIndicator } from 'react-native';
 import { TextInput, Button, Text, Card, IconButton } from 'react-native-paper';
-import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { endpoints, authApis } from '../../configs/Apis';
 
 const HealthDiary = () => {
-  const [entries, setEntries] = useState([]);
+  const [diary, setDiary] = useState([]);
   const [text, setText] = useState('');
   const [feeling, setFeeling] = useState('');
   const [editId, setEditId] = useState(null);
+  const [loading, setLoading] = useState(false);
+
   const styles = getStyles();
-  const [diary, setDiary]= useState([]);
 
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const token = await AsyncStorage.getItem('access_token');
-  //       const res = await authApis(token).get(endpoints['healthdiary-list']);
-  //       setEntries(res.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     try {
-  //       const res = await axios.get('http://192.168.3.22:8000/healthdiary/');
-  //       setEntries(res.data);
-  //     } catch (err) {
-  //       console.error(err);
-  //     }
-  //   };
-  //   fetchData();
-  // }, []);
-
-  const loadDiary = async () =>{
+  // Load nhật ký từ API
+  const loadDiary = async () => {
+    setLoading(true);
     try {
-      const token = await AsyncStorage.getItem('access_token');
-      if(!token) {
-        throw new Error('No token found');
-      }
+      const token = await AsyncStorage.getItem('token');
+      if (!token) throw new Error('No token found');
 
-      let res = await authApis(token).get(endpoints["healthdiary-list"])
-      console.log("Diary:", res.data);
-      if (res.data) {
-        setDiary(res.data);
+      const res = await authApis(token).get(endpoints['healthdiary-list']);
+      setDiary(Array.isArray(res.data) ? res.data : []);
+    } catch (err) {
+      console.error("Lỗi khi tải nhật ký:", err);
+
+      // Nếu lỗi do token hết hạn hoặc không hợp lệ
+      if (err.response && err.response.status === 401) {
+        Alert.alert('Phiên đăng nhập hết hạn', 'Vui lòng đăng nhập lại.');
+        // TODO: chuyển hướng về màn hình đăng nhập nếu có điều hướng
+      } else {
+        Alert.alert('Lỗi', 'Không thể tải nhật ký.');
       }
-    } catch (ex) {
-      console.error("Error loading diarys:", ex);
-      console.log("Error details:", ex.response?.data);
       setDiary([]);
     } finally {
       setLoading(false);
@@ -63,9 +42,8 @@ const HealthDiary = () => {
     loadDiary();
   }, []);
 
-
-
-  const addEntry = () => {
+  // Thêm hoặc cập nhật nhật ký
+  const saveEntry = async () => {
     if (!text.trim()) {
       Alert.alert('Lỗi', 'Vui lòng nhập nội dung nhật ký!');
       return;
@@ -76,53 +54,79 @@ const HealthDiary = () => {
       return;
     }
 
-    if (editId) {
-      const updated = entries.map(e =>
-        e.id === editId
-          ? { ...e, content: text.trim(), feeling: feeling.trim(), date: new Date().toISOString() }
-          : e
-      );
-      setEntries(updated);
-      setEditId(null);
+    setLoading(true);
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      if (editId) {
+        await authApis(token).put(`${endpoints['healthdiary-list']}${editId}/`, {
+          content: text.trim(),
+          feeling: feeling.trim(),
+        });
+        Alert.alert('✅ Cập nhật thành công');
+      } else {
+        await authApis(token).post(endpoints['healthdiary-list'], {
+          content: text.trim(),
+          feeling: feeling.trim(),
+        });
+        Alert.alert('✅ Đã lưu nhật ký');
+      }
+
       setText('');
       setFeeling('');
-      return;
+      setEditId(null);
+      await loadDiary();
+    } catch (err) {
+      console.error("Lỗi khi lưu nhật ký:", err);
+      Alert.alert('Lỗi', 'Không thể lưu nhật ký');
+    } finally {
+      setLoading(false);
     }
-
-    const newEntry = {
-      id: Date.now(),
-      date: new Date().toISOString(),
-      content: text.trim(),
-      feeling: feeling.trim(),
-    };
-    setEntries([newEntry, ...entries]);
-    setText('');
-    setFeeling('');
   };
 
+  // Xoá nhật ký
+  const deleteEntry = async (id) => {
+    Alert.alert('Xoá nhật ký', 'Bạn có chắc muốn xoá nhật ký này?', [
+      { text: 'Huỷ', style: 'cancel' },
+      {
+        text: 'Xoá',
+        style: 'destructive',
+        onPress: async () => {
+          setLoading(true);
+          try {
+            const token = await AsyncStorage.getItem('token');
+            if (!token) throw new Error('No token found');
+
+            await authApis(token).delete(`${endpoints['healthdiary-list']}${id}/`);
+            await loadDiary();
+          } catch (err) {
+            console.error("Lỗi xoá nhật ký:", err);
+            Alert.alert('Lỗi', 'Không thể xoá nhật ký');
+          } finally {
+            setLoading(false);
+          }
+        },
+      },
+    ]);
+  };
+
+  // Bắt đầu chỉnh sửa
   const startEdit = (id, content, feelingValue) => {
     setEditId(id);
     setText(content);
     setFeeling(feelingValue);
   };
 
-  const deleteEntry = (id) => {
-    Alert.alert('Xoá nhật ký', 'Bạn có chắc muốn xoá nhật ký này?', [
-      { text: 'Huỷ', style: 'cancel' },
-      {
-        text: 'Xoá',
-        style: 'destructive',
-        onPress: () => {
-          setEntries(entries.filter(e => e.id !== id));
-        },
-      },
-    ]);
-  };
-
   return (
-    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={styles.container}>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text variant="titleLarge" style={styles.header}>📔 Nhật ký sức khỏe</Text>
+        <Text variant="titleLarge" style={styles.header}>
+          📔 Nhật ký sức khỏe
+        </Text>
 
         <TextInput
           label="Viết cảm nhận sau buổi tập..."
@@ -133,6 +137,7 @@ const HealthDiary = () => {
           onChangeText={setText}
           style={styles.input}
           placeholder="Hôm nay bạn cảm thấy thế nào?"
+          editable={!loading}
         />
 
         <TextInput
@@ -142,29 +147,44 @@ const HealthDiary = () => {
           onChangeText={setFeeling}
           style={styles.input}
           placeholder="Nhập cảm xúc của bạn"
+          editable={!loading}
         />
 
-        <Button mode="contained" onPress={addEntry} style={styles.button}>
+        <Button mode="contained" onPress={saveEntry} style={styles.button} disabled={loading}>
           {editId ? 'Cập nhật nhật ký' : 'Lưu nhật ký'}
         </Button>
 
-        {entries.length === 0 && (
-          <Text style={styles.emptyText}>Bạn chưa có nhật ký nào.</Text>
-        )}
+        {loading && <ActivityIndicator size="large" style={{ marginVertical: 20 }} />}
 
-        {/* {entries.map(({ id, date, content, feeling }) => (
-          <Card key={id} style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.dateText}>{new Date(date).toLocaleString()}</Text>
-              <View style={styles.cardActions}>
-                <IconButton icon="pencil" size={20} onPress={() => startEdit(id, content, feeling)} />
-                <IconButton icon="delete" size={20} onPress={() => deleteEntry(id)} />
+        {!loading && (diary.length === 0 ? (
+          <Text style={styles.emptyText}>Bạn chưa có nhật ký nào.</Text>
+        ) : (
+          diary.map(({ id, date, content, feeling }) => (
+            <Card key={id} style={styles.card}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.dateText}>
+                  {date ? new Date(date).toLocaleString() : 'Không rõ ngày'}
+                </Text>
+                <View style={styles.cardActions}>
+                  <IconButton
+                    icon="pencil"
+                    size={20}
+                    onPress={() => startEdit(id, content, feeling)}
+                    disabled={loading}
+                  />
+                  <IconButton
+                    icon="delete"
+                    size={20}
+                    onPress={() => deleteEntry(id)}
+                    disabled={loading}
+                  />
+                </View>
               </View>
-            </View>
-            <Text style={styles.cardContent}>{content}</Text>
-            <Text style={styles.cardFeeling}>Cảm xúc: {feeling}</Text>
-          </Card>
-        ))} */}
+              <Text style={styles.cardContent}>{content}</Text>
+              <Text style={styles.cardFeeling}>Cảm xúc: {feeling}</Text>
+            </Card>
+          ))
+        ))}
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -181,6 +201,7 @@ const getStyles = () =>
     header: {
       marginBottom: 20,
       textAlign: 'center',
+      fontWeight: 'bold',
     },
     input: {
       marginBottom: 16,

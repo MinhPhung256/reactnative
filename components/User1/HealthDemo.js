@@ -1,6 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ScrollView, KeyboardAvoidingView, Platform, View, TouchableOpacity, Alert, StyleSheet } from 'react-native';
-import { TextInput, Text, RadioButton } from 'react-native-paper';
+import { TextInput, Text, Menu, Button } from 'react-native-paper';
+import { endpoints, authApis } from '../../configs/Apis'; 
+import AsyncStorage from '@react-native-async-storage/async-storage'; 
+
+const goals = [
+  { label: 'Duy trì cân nặng', value: 'maintain' },
+  { label: 'Giảm cân', value: 'lose' },
+  { label: 'Tăng cân', value: 'gain' },
+];
 
 const PersonalBMIInfoScreen = () => {
   const [height, setHeight] = useState(''); // cm
@@ -12,9 +20,21 @@ const PersonalBMIInfoScreen = () => {
   const [bmiStatus, setBmiStatus] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
 
+  const [menuVisible, setMenuVisible] = useState(false);
+
+  // Tự động tính BMI khi height hoặc weight thay đổi
+  useEffect(() => {
+    if (height && weight) {
+      calculateBMI();
+    } else {
+      setBmi(null);
+      setBmiStatus('');
+    }
+  }, [height, weight]);
+
   const calculateBMI = () => {
     const w = parseFloat(weight);
-    const h = parseFloat(height) / 100; // cm -> m
+    const h = parseFloat(height) / 100;
 
     if (!w || !h || h === 0) {
       setBmi(null);
@@ -37,7 +57,7 @@ const PersonalBMIInfoScreen = () => {
     return true;
   };
 
-  const saveInfo = () => {
+  const saveInfo = async () => {
     if (!height || !weight || !age) {
       Alert.alert('Lỗi', 'Vui lòng nhập đầy đủ chiều cao, cân nặng và tuổi!');
       return;
@@ -52,15 +72,35 @@ const PersonalBMIInfoScreen = () => {
     }
 
     if (!calculateBMI()) {
-      // nếu BMI không hợp lệ thì không lưu
       return;
     }
 
-    // Thay bằng gọi API lưu dữ liệu ở đây
-    Alert.alert(
-      'Thông tin đã lưu',
-      `Chiều cao: ${h} cm\nCân nặng: ${w} kg\nTuổi: ${a}\nMục tiêu: ${goal}\n\nBMI của bạn: ${bmi}\nPhân loại: ${bmiStatus}`
-    );
+    try {
+      // Lấy token và userId (giả sử bạn lưu trong AsyncStorage)
+      const token = await AsyncStorage.getItem('token');
+      const userId = await AsyncStorage.getItem('userId');
+      if (!token || !userId) {
+        Alert.alert('Lỗi', 'Bạn chưa đăng nhập!');
+        return;
+      }
+
+      const api = authApis(token);
+      const url = endpoints['update-user'](userId);
+
+      const payload = {
+        height: h,
+        weight: w,
+        age: a,
+        goal,
+        bmi: parseFloat(bmi),
+      };
+
+      const response = await api.put(url, payload);
+      Alert.alert('Thành công', 'Thông tin cá nhân đã được cập nhật!');
+    } catch (error) {
+      console.error('Lỗi lưu thông tin:', error);
+      Alert.alert('Lỗi', 'Không thể lưu thông tin. Vui lòng thử lại sau.');
+    }
   };
 
   return (
@@ -104,10 +144,6 @@ const PersonalBMIInfoScreen = () => {
           placeholder="VD: 30"
         />
 
-        <TouchableOpacity style={styles.bmiButton} onPress={calculateBMI}>
-          <Text style={styles.bmiButtonText}>Tính BMI</Text>
-        </TouchableOpacity>
-
         {!!bmi && (
           <View style={styles.resultContainer}>
             <Text style={styles.resultText}>BMI của bạn: {bmi}</Text>
@@ -118,11 +154,27 @@ const PersonalBMIInfoScreen = () => {
         {!!errorMsg && <Text style={styles.errorText}>{errorMsg}</Text>}
 
         <Text style={[styles.goalTitle, { marginTop: 24 }]}>🎯 Mục tiêu sức khỏe</Text>
-        <RadioButton.Group onValueChange={setGoal} value={goal}>
-          <RadioButton.Item label="Duy trì cân nặng" value="maintain" />
-          <RadioButton.Item label="Giảm cân" value="lose" />
-          <RadioButton.Item label="Tăng cân" value="gain" />
-        </RadioButton.Group>
+
+        <Menu
+          visible={menuVisible}
+          onDismiss={() => setMenuVisible(false)}
+          anchor={
+            <Button mode="outlined" onPress={() => setMenuVisible(true)}>
+              {goals.find(g => g.value === goal)?.label || 'Chọn mục tiêu'}
+            </Button>
+          }
+        >
+          {goals.map((item) => (
+            <Menu.Item
+              key={item.value}
+              onPress={() => {
+                setGoal(item.value);
+                setMenuVisible(false);
+              }}
+              title={item.label}
+            />
+          ))}
+        </Menu>
 
         <TouchableOpacity style={styles.saveButton} onPress={saveInfo}>
           <Text style={styles.saveButtonText}>Lưu thông tin</Text>
@@ -147,19 +199,6 @@ const styles = StyleSheet.create({
   },
   input: {
     marginBottom: 16,
-  },
-  bmiButton: {
-    backgroundColor: '#B00000',
-    borderRadius: 25,
-    paddingVertical: 12,
-    marginTop: 10,
-    marginBottom: 10,
-  },
-  bmiButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-    fontSize: 16,
-    textAlign: 'center',
   },
   resultContainer: {
     marginVertical: 10,

@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import Apis, { endpoints, authApis } from "../../configs/Apis";
-import { ScrollView} from "react-native"
+import { ScrollView, Text, TouchableOpacity} from "react-native"
 import { TextInput, Button, HelperText } from "react-native-paper"
 import MyStyles from '../../styles/MyStyles';
-import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import qs from 'qs';
+import { MyDispatchContext } from "../../configs/UserContext";
+import { useNavigation } from "@react-navigation/native";
 
 const Login = () =>{
     const info = [{
@@ -24,7 +25,9 @@ const Login = () =>{
     const [user, setUser] = useState({});
     const [msg, setMsg] = useState();
     const [loading, setLoading] = useState(false);
-    const nav =useNavigation();
+    const dispatch = useContext(MyDispatchContext);
+    const navigation = useNavigation();
+
 
     const setState = (value, field) => {
         setUser({...user, [field]: value});
@@ -62,8 +65,8 @@ const Login = () =>{
 
                 let form = qs.stringify({
                   ...user,
-                  client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
-                  client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
+                  client_id: "L1Fcoo4vZtsk7CXrwvs3do2Ox0m44qevaXE7ur0H",
+                  client_secret: "YwYDoFLQZdxWs7nrUniflGvGb86bqObXqKacTLoctJ45CU6LapsUE4fQfD9K42lU60sIelAyW93xpIDlsC52qxh7dn5TVDpuOYEdIAKwCx9GKtWRElWzwXkyVTninNEd",
                   grant_type: "password"
                 });
 
@@ -74,10 +77,17 @@ const Login = () =>{
                 });
                 await AsyncStorage.setItem('token', res.data.access_token);         
                 
-                let u = await authApis(res.data.access_token).get(endpoints['current_user']);
+                let u = await authApis(res.data.access_token).get(endpoints['current-user']);
                 console.info(u.data);
 
-                nav.navigate("HomeStack");  
+                dispatch({
+                  type: "login",
+                  payload: {
+                    ...u.data,
+                    token: res.data.access_token
+                  }
+                }); 
+
             }  catch (ex) {
               if (ex.response) {
        
@@ -86,7 +96,7 @@ const Login = () =>{
               } else {
        
                 console.error('Error message:', ex.message);
-                setMsg("Đã xảy ra lỗi. Vui lòng thử lại sau.");
+                setMsg("Đã xảy ra lỗi. Vui lòng thử lại sau");
               }
             } finally {
               setLoading(false);
@@ -119,6 +129,16 @@ const Login = () =>{
                 }}
               />
             ))}
+
+            <TouchableOpacity 
+              onPress={() => navigation.navigate('ForgotPassword')}
+              style={{ marginRight:30, marginBottom: 20 }}
+            >
+              <Text style={{ color: '#B00000', textAlign: 'right'}}>
+                Quên mật khẩu?
+              </Text>
+            </TouchableOpacity>
+
             <Button
               style={{ backgroundColor: "#B00000" }}
               disabled={loading}
@@ -128,6 +148,15 @@ const Login = () =>{
             >
               Đăng nhập
             </Button>
+
+            
+
+            <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+              <Text style={{ color: 'gray', textAlign: 'center', marginTop: 10 }}>
+                Nếu bạn chưa có tài khoản, hãy <Text style={{ color: '#B00000', fontWeight: 'bold'}}>đăng ký</Text>
+              </Text>
+            </TouchableOpacity>
+
           </ScrollView>
         );
       };
