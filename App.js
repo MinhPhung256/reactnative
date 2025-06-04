@@ -17,13 +17,17 @@ import Profile from "./components/User/Profile";
 import HealthDiary from "./components/User1/HealthDiary";
 import Statistics from "./components/User1/Statistics";
 import Reminders from "./components/User1/Reminders"
-import PersonalInfoScreen from "./components/User1/HealthDemo";
+import PersonalInfoScreen from "./components/User1/ProfileInput";
 import MealPlan from "./components/MealPlan";
 import WorkoutPlan from "./components/WorkoutPlan";
 import ForgotPassword from "./components/User/ForgotPassword";
 import ChangePassword from "./components/ChangePassword";
 import ResetPassword from "./components/User/ResetPassword";
 import ExpertInfo from "./components/user2/ExpertInfo";
+import ProfileInput from "./components/User1/ProfileInput";
+import Water from "./components/User1/Water";
+import HealthView from "./components/User1/HealthView";
+import Connection from "./components/User1/Connection";
 
 const Stack = createNativeStackNavigator();
 
@@ -85,8 +89,19 @@ const HomeStack = () => {
 
 const ProfileStack = () => {
   return (
-      <Stack.Navigator>
-          <Stack.Screen name="Profile" component={Profile} options={{ title: 'Tài khoản', headerBackVisible: false }} />
+    <Stack.Navigator
+       screenOptions={{
+        headerBackTitleVisible: false,
+        headerStyle: {
+          backgroundColor: '#BB0000'
+        },
+        headerTitleStyle: {
+          color: 'white'
+        },
+        headerTintColor: 'white',
+      }}
+    >
+          <Stack.Screen name="Profile" component={Profile} options={{ title: 'TÀI KHOẢN', headerBackVisible: false }} />
           <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ title: 'Đổi mật khẩu' }} />
       </Stack.Navigator>
   );
@@ -115,6 +130,9 @@ const AdminStack = () => {
   );
 };
 
+
+
+
 const ChatStack = () => {
   return (
       <Stack.Navigator>
@@ -140,25 +158,21 @@ const TabNavigator = () => {
         color: 'white'
       },
       headerTintColor: 'white',}}>
-      {user === null ? (
-        <>
-         <Tab.Screen name="IndexStack" component={IndexStack} options={{  headerShown: false, tabBarLabel: 'Trang chủ', tabBarIcon: ({ color, size }) => <Icon source="home" color={color} size={size} /> }} />
+       {user === null ? (
+    <Tab.Screen name="IndexStack" component={IndexStack} options={{ headerShown: false, tabBarLabel: 'Trang chủ', tabBarIcon: ({ color, size }) => <Icon source="home" color={color} size={size} /> }} />
+  ) : user.role === 1 ? (
+    <>
+      <Tab.Screen name="HomeStack" component={HomeStack} options={{ headerShown: false, tabBarLabel: 'Trang chủ', tabBarIcon: ({ color, size }) => <Icon source="home" color={color} size={size} /> }} />
+      <Tab.Screen name="HealthDiary" component={HealthDiary} options={{ tabBarLabel: 'Nhật kí', tabBarIcon: ({ color, size }) => <Icon source="book" color={color} size={size} /> }} />
+      <Tab.Screen name="Reminders" component={Reminders} options={{ tabBarLabel: 'Thông báo', tabBarIcon: ({ color, size }) => <Icon source="bell" color={color} size={size} /> }} />
+      <Tab.Screen name="Statistics" component={Statistics} options={{ tabBarLabel: 'Thống kê', tabBarIcon: ({ color, size }) => <Icon source="chart-line" color={color} size={size} /> }} />
+      <Tab.Screen name="ExpertInfo" component={ExpertInfo} options={{ tabBarLabel: 'Kết nối', tabBarIcon: ({ color, size }) => <Icon source="account-group" color={color} size={size} /> }} />
+      <Tab.Screen name="ProfileStack" component={ProfileStack} options={{ headerShown: false, tabBarLabel: 'Người dùng', tabBarIcon: ({ color, size }) => <Icon source="account-cog" color={color} size={size} /> }} /> 
+    </>  
+    ) : user.role === 2 ? (
+      <Tab.Screen name="AdminStack" component={AdminStack} options={{ title: 'Quản trị', tabBarIcon: ({ color, size }) => <Icon source="shield-account" color={color} size={size} /> }} />
 
-        </>
-      ): (  
-      
-        <>
-        <Tab.Screen name="HomeStack" component={HomeStack} options={{ headerShown: false, tabBarIcon: ({ color, size }) => <Icon source="home" color={color} size={size} /> }} />
-        <Tab.Screen name="HealthDiary" component={HealthDiary} options={{ tabBarLabel: 'Nhật kí',tabBarIcon: ({ color, size }) => <Icon source="book" color={color} size={size} /> }} />
-         <Tab.Screen name="Reminders" component={Reminders} options={{ tabBarLabel: 'Thông báo', tabBarIcon: ({ color, size }) => <Icon source="bell" color={color} size={size} /> }} />
-         <Tab.Screen name="Statistics" component={Statistics} options={{ tabBarLabel: 'Thống kê', tabBarIcon: ({ color, size }) => <Icon source="chart-line" color={color} size={size} /> }} />
-         <Tab.Screen name="ExpertInfo" component={ExpertInfo} options={{ tabBarLabel: 'Kết nối', tabBarIcon: ({ color, size }) => <Icon source="chart-line" color={color} size={size} /> }} />
-        {user.role === 0 && (
-            <Tab.Screen name="AdminStack" component={AdminStack} options={{ title: 'Quản trị', tabBarIcon: ({ color, size }) => <Icon source="shield-account" color={color} size={size} /> }} />
-        )}
-        <Tab.Screen name="ProfileStack" component={ProfileStack} options={{ title: 'Tài khoản', tabBarIcon: ({ color, size }) => <Icon source="account-cog" color={color} size={size} /> }} />
-        </>
-      )}
+    ):null}
       </Tab.Navigator>
   );
 }

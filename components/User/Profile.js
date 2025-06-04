@@ -2,12 +2,12 @@ import React, { useEffect, useState, useContext } from "react";
 import { View, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Text, Card, Button } from "react-native-paper";
 import { useNavigation } from "@react-navigation/native";
-import { MyDispatchContext, MyUserContext } from "../../configs/UserContext";
+import { MyDispatchContext } from "../../configs/UserContext";
 import { authApis, endpoints } from "../../configs/Apis";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Profile = () => {
   const dispatch = useContext(MyDispatchContext);
-  const token = useContext(MyUserContext);
   const nav = useNavigation();
 
   const [user, setUser] = useState(null);
@@ -20,8 +20,9 @@ const Profile = () => {
 
   useEffect(() => {
     const loadUser = async () => {
-        console.log("Token hiện tại:", token);
       try {
+        const token = await AsyncStorage.getItem('token');
+        console.log("Token hiện tại:", token);
         let res = await authApis(token).get(endpoints["current-user"]);
         setUser(res.data);
       } catch (err) {
@@ -54,7 +55,7 @@ const Profile = () => {
       <Card>
         <View style={styles.avatarContainer}>
           {user.avatar ? (
-            <Image source={{ uri: user.avatar }} style={styles.avatar} />
+            <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
           ) : (
             <Image
               source={require("../../assets/Images/default_avatar.jpg")}
@@ -67,11 +68,18 @@ const Profile = () => {
           <Text style={styles.label}>Email: <Text style={styles.value}>{user.email}</Text></Text>
           <Text style={styles.label}>Họ: <Text style={styles.value}>{user.last_name}</Text></Text>
           <Text style={styles.label}>Tên: <Text style={styles.value}>{user.first_name}</Text></Text>
-          <Text style={styles.label}>Vai trò: <Text style={styles.value}>{user.role}</Text></Text>
+          <Text style={styles.label}>Vai trò: <Text style={styles.value}>
+          {user.role === 1
+            ? "Người dùng tự theo dõi"
+            : user.role === 2
+            ? "Người dùng kết nối với chuyên gia"
+            : "Huấn luyện viên"}
+            </Text>
+          </Text>
         </Card.Content>
         <Card.Actions style={styles.actions}>
-          <Button mode="outlined" onPress={() => nav.navigate("EditProfile")}>✏️ Chỉnh sửa</Button>
-          <Button mode="contained" onPress={logout}>🔓 Đăng xuất</Button>
+          <Button textColor="#B00000" style={{ borderColor: '#B00000', borderWidth: 1, marginLeft: 20, marginBottom:10 }} mode="outlined" onPress={() => nav.navigate("EditProfile")}>Chỉnh sửa</Button>
+          <Button buttonColor="#B00000" textColor="white" style={{marginRight: 20, marginBottom:10}} mode="contained" onPress={logout}>Đăng xuất</Button>
         </Card.Actions>
       </Card>
     </View>

@@ -107,7 +107,7 @@ const Register = () =>{
             }
         }
     
-            if (user.role !== '0' && user.role !== '1') {
+            if (!['1', '2', '3'].includes(user.role)) {
                 setMsg("Vui lòng chọn vai trò");
                 return false;
             }
@@ -124,7 +124,7 @@ const Register = () =>{
 
                 let form = new FormData();
                 for (let key in user) {
-                    form.append('confirm_password', user.confirm_password);
+                   
 
                     if (key === 'avatar') {
                         form.append('avatar', {
@@ -138,6 +138,7 @@ const Register = () =>{
                         form.append(key, user[key]);
                     }
                 }
+                form.append('confirm_password', user.confirm_password);
                 
                 for (let pair of form.entries()) {
                     console.log(`${pair[0]}: ${pair[1]}`);
@@ -210,8 +211,9 @@ const Register = () =>{
 
             {user?.avatar && <Image source={{uri: user.avatar.uri}} style={[MyStyles.logo, MyStyles.margin]}/>}
                 <RadioButton.Group value={user.role} onValueChange={value => setState(value, 'role')}>
-                    <RadioButton.Item label="Người dùng" value="0" color='#B00000'/>
-                    <RadioButton.Item label="Chuyên gia dinh dưỡng" value="1" color='#B00000'/>
+                <RadioButton.Item label="Người dùng tự theo dõi" value="1" color='#B00000'/>
+  <RadioButton.Item label="Người dùng kết nối chuyên gia" value="2" color='#B00000'/>
+  <RadioButton.Item label="Huấn luyện viên" value="3" color='#B00000'/>
                 </RadioButton.Group>
             <Button style={{backgroundColor:"#B00000"}} disabled={loading} loading ={loading} onPress={register}mode="contained">Đăng ký</Button>
             

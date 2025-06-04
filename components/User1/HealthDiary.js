@@ -39,7 +39,13 @@ const HealthDiary = () => {
   };
 
   useEffect(() => {
-    loadDiary();
+    const checkLogin = async () => {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) {
+        Alert.alert('Bạn chưa đăng nhập', 'Vui lòng đăng nhập lại.');
+      }
+    };
+    checkLogin();
   }, []);
 
   // Thêm hoặc cập nhật nhật ký

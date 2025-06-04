@@ -65,8 +65,8 @@ const Login = () =>{
 
                 let form = qs.stringify({
                   ...user,
-                  client_id: "L1Fcoo4vZtsk7CXrwvs3do2Ox0m44qevaXE7ur0H",
-                  client_secret: "YwYDoFLQZdxWs7nrUniflGvGb86bqObXqKacTLoctJ45CU6LapsUE4fQfD9K42lU60sIelAyW93xpIDlsC52qxh7dn5TVDpuOYEdIAKwCx9GKtWRElWzwXkyVTninNEd",
+                  client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
+                  client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
                   grant_type: "password"
                 });
 
