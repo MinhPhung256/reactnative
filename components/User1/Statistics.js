@@ -5,46 +5,7 @@ import { BarChart } from 'react-native-chart-kit';
 
 const screenWidth = Dimensions.get('window').width;
 
-const styles = {
-  container: {
-    flex: 1,
-    backgroundColor: '#f9fafb',
-    paddingHorizontal: 16,
-    paddingTop: 20,
-  },
-  contentContainer: {
-    paddingBottom: 40,
-  },
-  title: {
-    marginBottom: 24,
-    fontWeight: '700',
-    color: '#333',
-    textAlign: 'center',
-  },
-  card: {
-    padding: 20,
-    marginBottom: 24,
-    borderRadius: 16,
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3, // cho Android
-  },
-  chartTitleCalories: {
-    marginBottom: 12,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#ff6347', // Tomato
-  },
-  chartTitleDuration: {
-    marginBottom: 12,
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#1e88e5', // Blue
-  },
-};
+
 
 const StatisticsScreen = () => {
   const [stats] = useState([
@@ -64,7 +25,7 @@ const StatisticsScreen = () => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
       <Text variant="titleLarge" style={styles.title}>
-        📊 Thống kê hàng tuần
+      Thống kê hàng tuần
       </Text>
 
       <Card style={styles.card}>
@@ -119,3 +80,45 @@ const StatisticsScreen = () => {
 };
 
 export default StatisticsScreen;
+
+
+const styles = {
+  container: {
+    flex: 1,
+    backgroundColor: '#f9fafb',
+    paddingHorizontal: 16,
+    paddingTop: 20,
+  },
+  contentContainer: {
+    paddingBottom: 40,
+  },
+  title: {
+    marginBottom: 24,
+    fontWeight: '700',
+    color: '#B00000',
+    textAlign: 'center',
+  },
+  card: {
+    padding: 20,
+    marginBottom: 24,
+    borderRadius: 16,
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 3, 
+  },
+  chartTitleCalories: {
+    marginBottom: 12,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#ff6347', 
+  },
+  chartTitleDuration: {
+    marginBottom: 12,
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#1e88e5', 
+  },
+};

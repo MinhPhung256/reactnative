@@ -2,7 +2,7 @@ export const iconItems = [
   {
     icon: 'heart',
     text: 'Theo dõi sức khỏe',
-    screen: 'HealthDemo',
+    screen: 'ProfileInput',
     requiresLogin: true,
   },
   {

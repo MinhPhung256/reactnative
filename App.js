@@ -28,6 +28,7 @@ import ProfileInput from "./components/User1/ProfileInput";
 import Water from "./components/User1/Water";
 import HealthView from "./components/User1/HealthView";
 import Connection from "./components/User1/Connection";
+import EditProfile from "./components/User/EditProfile";
 
 const Stack = createNativeStackNavigator();
 
@@ -59,6 +60,7 @@ const IndexStack = () => {
 }
 
 
+
 const HomeStack = () => {
   return (
     <Stack.Navigator
@@ -77,7 +79,7 @@ const HomeStack = () => {
       <Stack.Screen name="UserStack" component={UserStack} options={{ title: "CHÀO MỪNG BẠN TRỞ LẠI"}}/>
       <Stack.Screen name="ChooseRole" component={ChooseRole} options={{ title: "CHẾ ĐỘ"}}/>
       <Stack.Screen name="BMICalculator" component={BMICalculator} options={{title: "TÍNH BMI"}}/>
-      <Stack.Screen name="HealthDemo" component={PersonalInfoScreen} options={{title: "THEO DÕI SỨC KHOẺ"}}/>
+      <Stack.Screen name="ProfileInput" component={ProfileInput} options={{title: "THEO DÕI SỨC KHOẺ"}}/>
       <Stack.Screen name="MealPlan" component={MealPlan} options={{title: "THỰC ĐƠN DINH DƯỠNG"}}/>
       <Stack.Screen name="WorkoutPlan" component={WorkoutPlan} options={{title: "LỊCH TẬP LUYỆN"}}/>
       <Stack.Screen name="ActivityDetail" component={ActivityDetail} options={{title: "HOẠT ĐỘNG"}}/>
@@ -102,10 +104,13 @@ const ProfileStack = () => {
       }}
     >
           <Stack.Screen name="Profile" component={Profile} options={{ title: 'TÀI KHOẢN', headerBackVisible: false }} />
-          <Stack.Screen name="ChangePassword" component={ChangePassword} options={{ title: 'Đổi mật khẩu' }} />
+          <Stack.Screen name="EditProfile" component={EditProfile} options={{ title: 'Chỉnh sửa thôgn tin' }} />
+
       </Stack.Navigator>
   );
 };
+
+
 
 const UserStack = () => {
   return (
@@ -155,21 +160,22 @@ const TabNavigator = () => {
       },
       tabBarActiveTintColor:  '#BB0000',
       headerTitleStyle: {
+        fontSize: 18,
         color: 'white'
       },
       headerTintColor: 'white',}}>
        {user === null ? (
     <Tab.Screen name="IndexStack" component={IndexStack} options={{ headerShown: false, tabBarLabel: 'Trang chủ', tabBarIcon: ({ color, size }) => <Icon source="home" color={color} size={size} /> }} />
-  ) : user.role === 1 ? (
+  ) : user.role === 0 ? (
     <>
       <Tab.Screen name="HomeStack" component={HomeStack} options={{ headerShown: false, tabBarLabel: 'Trang chủ', tabBarIcon: ({ color, size }) => <Icon source="home" color={color} size={size} /> }} />
-      <Tab.Screen name="HealthDiary" component={HealthDiary} options={{ tabBarLabel: 'Nhật kí', tabBarIcon: ({ color, size }) => <Icon source="book" color={color} size={size} /> }} />
-      <Tab.Screen name="Reminders" component={Reminders} options={{ tabBarLabel: 'Thông báo', tabBarIcon: ({ color, size }) => <Icon source="bell" color={color} size={size} /> }} />
-      <Tab.Screen name="Statistics" component={Statistics} options={{ tabBarLabel: 'Thống kê', tabBarIcon: ({ color, size }) => <Icon source="chart-line" color={color} size={size} /> }} />
+      <Tab.Screen name="HealthDiary" component={HealthDiary} options={{ title: 'Nhật kí', tabBarLabel: 'Nhật kí', tabBarIcon: ({ color, size }) => <Icon source="book" color={color} size={size} /> }} />
+      <Tab.Screen name="Reminders" component={Reminders} options={{ title: 'Thông báo',tabBarLabel: 'Thông báo', tabBarIcon: ({ color, size }) => <Icon source="bell" color={color} size={size} /> }} />
+      <Tab.Screen name="Statistics" component={Statistics} options={{ title: 'Thống kê',tabBarLabel: 'Thống kê', tabBarIcon: ({ color, size }) => <Icon source="chart-line" color={color} size={size} /> }} />
       <Tab.Screen name="ExpertInfo" component={ExpertInfo} options={{ tabBarLabel: 'Kết nối', tabBarIcon: ({ color, size }) => <Icon source="account-group" color={color} size={size} /> }} />
       <Tab.Screen name="ProfileStack" component={ProfileStack} options={{ headerShown: false, tabBarLabel: 'Người dùng', tabBarIcon: ({ color, size }) => <Icon source="account-cog" color={color} size={size} /> }} /> 
     </>  
-    ) : user.role === 2 ? (
+    ) : user.role === 1 ? (
       <Tab.Screen name="AdminStack" component={AdminStack} options={{ title: 'Quản trị', tabBarIcon: ({ color, size }) => <Icon source="shield-account" color={color} size={size} /> }} />
 
     ):null}

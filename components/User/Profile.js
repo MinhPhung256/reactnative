@@ -69,9 +69,9 @@ const Profile = () => {
           <Text style={styles.label}>Họ: <Text style={styles.value}>{user.last_name}</Text></Text>
           <Text style={styles.label}>Tên: <Text style={styles.value}>{user.first_name}</Text></Text>
           <Text style={styles.label}>Vai trò: <Text style={styles.value}>
-          {user.role === 1
+          {user.role === 0
             ? "Người dùng tự theo dõi"
-            : user.role === 2
+            : user.role === 1
             ? "Người dùng kết nối với chuyên gia"
             : "Huấn luyện viên"}
             </Text>

@@ -25,12 +25,12 @@ const MealPlan = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>🍽️ Gợi ý thực đơn dinh dưỡng</Text>
+      <Text style={styles.title}>Gợi ý thực đơn dinh dưỡng</Text>
 
       <RadioButton.Group onValueChange={setGoal} value={goal}>
-        <RadioButton.Item label="Duy trì cân nặng" value="maintain" />
-        <RadioButton.Item label="Giảm cân" value="lose" />
-        <RadioButton.Item label="Tăng cơ" value="gain" />
+        <RadioButton.Item label="Duy trì cân nặng" value="maintain" color='#B00000' />
+        <RadioButton.Item label="Giảm cân" value="lose" color='#B00000'/>
+        <RadioButton.Item label="Tăng cơ" value="gain" color='#B00000'/>
       </RadioButton.Group>
 
       <FlatList

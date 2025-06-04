@@ -25,7 +25,7 @@ const WorkoutPlan = () => {
 
   return (
     <ScrollView style={{ padding: 16 }}>
-      <Text variant="titleLarge" style={{ marginBottom: 16 }}>🏋️‍♂️ Lịch tập luyện cá nhân</Text>
+      <Text variant="titleLarge" style={{textAlign: 'center',fontSize:18, marginBottom: 16, color:'#B00000', fontWeight:'bold'}}>Lịch tập luyện cá nhân</Text>
 
       <Calendar
         onDayPress={(day) => setSelectedDate(day.dateString)}
@@ -36,25 +36,26 @@ const WorkoutPlan = () => {
 
       {selectedDate ? (
         <View style={{ marginTop: 16 }}>
-          <Text variant="titleMedium" style={{ marginBottom: 8 }}>📅 Ngày: {selectedDate}</Text>
+          <Text variant="titleMedium" style={{ marginBottom: 8 }}>Ngày: {selectedDate}</Text>
 
-          <Text style={{ fontWeight: 'bold', marginBottom: 8 }}>💡 Gợi ý bài tập:</Text>
+          <Text style={{ fontWeight: 'bold', marginBottom: 8, color:'#B00000' }}>Gợi ý bài tập:</Text>
           {suggestedWorkouts.map((workout, index) => (
             <Button
               key={index}
               mode="outlined"
               onPress={() => addWorkout(workout)}
-              style={{ marginBottom: 8 }}
+              textColor="#B00000"
+              style={{ borderColor: '#B00000', borderWidth: 1, marginBottom: 8 }}
             >
               {workout}
             </Button>
           ))}
 
-          <Button mode="contained" onPress={() => setDialogVisible(true)} style={{ marginTop: 12 }}>
+          <Button buttonColor="#B00000" textColor="white" mode="contained" onPress={() => setDialogVisible(true)} style={{ marginTop: 12 }}>
             ➕ Tự thêm bài tập
           </Button>
 
-          <Text style={{ fontWeight: 'bold', marginTop: 20 }}>📋 Danh sách bài tập:</Text>
+          <Text style={{ fontWeight: 'bold', marginTop: 20, color:'#B00000' }}>Danh sách bài tập:</Text>
           {(workouts[selectedDate] || []).map((item, idx) => (
             <List.Item key={idx} title={item} left={props => <List.Icon {...props} icon="check" />} />
           ))}
@@ -67,19 +68,21 @@ const WorkoutPlan = () => {
       )}
 
       <Portal>
-        <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)}>
-          <Dialog.Title>📝 Thêm bài tập</Dialog.Title>
+        <Dialog visible={dialogVisible} onDismiss={() => setDialogVisible(false)} style={{ backgroundColor: '#FFEBEE' }}>
+          <Dialog.Title>Thêm bài tập</Dialog.Title>
           <Dialog.Content>
             <TextInput
               label="Tên bài tập"
               value={customWorkout}
               onChangeText={setCustomWorkout}
               mode="outlined"
+              outlineColor="#ccc"          
+              activeOutlineColor="#B00000" 
             />
           </Dialog.Content>
           <Dialog.Actions>
-            <Button onPress={() => setDialogVisible(false)}>Huỷ</Button>
-            <Button onPress={() => addWorkout(customWorkout)}>Lưu</Button>
+            <Button onPress={() => setDialogVisible(false)} textColor='#B00000'>Huỷ</Button>
+            <Button onPress={() => addWorkout(customWorkout)} textColor='#B00000'>Lưu</Button>
           </Dialog.Actions>
         </Dialog>
       </Portal>
