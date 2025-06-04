@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, KeyboardAvoidingView, Platform, Alert, StyleSheet, View, ActivityIndicator, TouchableOpacity } from 'react-native';
+import { KeyboardAvoidingView, Platform, Alert, StyleSheet, View, ActivityIndicator} from 'react-native';
 import { TextInput, Button, Text, Card, IconButton } from 'react-native-paper';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { endpoints, authApis } from '../../configs/Apis';
+import { FlatList } from 'react-native';
 
 const HealthDiary = () => {
   const [diary, setDiary] = useState([]);
@@ -11,10 +12,11 @@ const HealthDiary = () => {
   const [editId, setEditId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [nextPage, setNextPage] = useState(null);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   const styles = getStyles();
 
-  // Load nhật ký từ API
+  // Load nhật ký lần đầu hoặc sau khi cập nhật/xóa
   const loadDiary = async () => {
     setLoading(true);
     try {
@@ -24,13 +26,10 @@ const HealthDiary = () => {
       const res = await authApis(token).get(endpoints['healthdiary-list']);
       setDiary(Array.isArray(res.data.results) ? res.data.results : []);
       setNextPage(res.data.next);
-
     } catch (err) {
       console.error("Lỗi khi tải nhật ký:", err);
-
       if (err.response && err.response.status === 401) {
         Alert.alert('Phiên đăng nhập hết hạn', 'Vui lòng đăng nhập lại.');
-        // TODO: chuyển hướng về màn hình đăng nhập nếu có điều hướng
       } else {
         Alert.alert('Lỗi', 'Không thể tải nhật ký.');
       }
@@ -40,14 +39,15 @@ const HealthDiary = () => {
     }
   };
 
+  // Load thêm khi scroll gần cuối
   const loadMoreDiary = async () => {
-    if (!nextPage) return;
-  
-    setLoading(true);
+    if (!nextPage || loadingMore) return;
+
+    setLoadingMore(true);
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) throw new Error('No token found');
-  
+
       const res = await authApis(token).get(nextPage);
       setDiary((prev) => [...prev, ...(res.data.results || [])]);
       setNextPage(res.data.next);
@@ -55,7 +55,7 @@ const HealthDiary = () => {
       console.error("Lỗi khi tải thêm nhật ký:", err);
       Alert.alert('Lỗi', 'Không thể tải thêm nhật ký.');
     } finally {
-      setLoading(false);
+      setLoadingMore(false);
     }
   };
 
@@ -65,76 +65,51 @@ const HealthDiary = () => {
       if (!token) {
         Alert.alert('Bạn chưa đăng nhập', 'Vui lòng đăng nhập lại.');
       } else {
-        await loadDiary(); 
+        await loadDiary();
       }
     };
     initialize();
   }, []);
 
-
-  // Thêm hoặc cập nhật nhật ký
+  // Hàm lưu nhật ký (thêm mới hoặc cập nhật)
   const saveEntry = async () => {
-    if (!text.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập nội dung nhật ký!');
+    if (!text.trim() || !feeling.trim()) {
+      Alert.alert('Thông báo', 'Vui lòng nhập đầy đủ cảm nhận và cảm xúc');
       return;
     }
-  
-    if (!feeling.trim()) {
-      Alert.alert('Lỗi', 'Vui lòng nhập cảm xúc của bạn!');
-      return;
-    }
-  
     setLoading(true);
-  
     try {
       const token = await AsyncStorage.getItem('token');
       if (!token) throw new Error('No token found');
-  
+
       if (editId) {
-        // ✅ Kiểm tra xem nhật ký cần cập nhật còn tồn tại không
-        try {
-          await authApis(token).get(`${endpoints['healthdiary-list']}${editId}/`);
-        } catch (checkErr) {
-          Alert.alert('Lỗi', 'Nhật ký này đã bị xoá hoặc không còn tồn tại.');
-          // Reset form và huỷ chỉnh sửa
-          setEditId(null);
-          setText('');
-          setFeeling('');
-          setLoading(false);
-          return;
-        }
-  
-        // ✅ Nếu còn thì tiến hành cập nhật
-        await authApis(token).put(`${endpoints['healthdiary-list']}${editId}/`, {
-          content: text.trim(),
-          feeling: feeling.trim(),
+        // Cập nhật nhật ký
+        await authApis(token).put(`${endpoints['healthdiary-detail']}${editId}/`, {
+          content: text,
+          feeling,
         });
-  
-        Alert.alert('Cập nhật thành công');
+        Alert.alert('Thành công', 'Đã cập nhật nhật ký');
       } else {
-        // ✅ Thêm nhật ký mới
+        // Thêm mới nhật ký
         await authApis(token).post(endpoints['healthdiary-list'], {
-          content: text.trim(),
-          feeling: feeling.trim(),
+          content: text,
+          feeling,
         });
-  
-        Alert.alert('Đã lưu nhật ký');
+        Alert.alert('Thành công', 'Đã lưu nhật ký mới');
       }
-  
-      // ✅ Reset form và reload
+      await loadDiary();
       setText('');
       setFeeling('');
       setEditId(null);
-      await loadDiary();
-    } catch (err) {
-      console.error("Lỗi khi lưu nhật ký:", err);
+    } catch (error) {
+      console.error(error);
       Alert.alert('Lỗi', 'Không thể lưu nhật ký');
     } finally {
       setLoading(false);
     }
   };
 
-  // Xoá nhật ký
+  // Xóa nhật ký
   const deleteEntry = async (id) => {
     Alert.alert('Xoá nhật ký', 'Bạn có chắc muốn xoá nhật ký này?', [
       { text: 'Huỷ', style: 'cancel' },
@@ -149,6 +124,7 @@ const HealthDiary = () => {
 
             await authApis(token).delete(`${endpoints['healthdiary-list']}${id}/`);
             await loadDiary();
+            Alert.alert('Thành công', 'Đã xoá nhật ký');
           } catch (err) {
             console.error("Lỗi xoá nhật ký:", err);
             Alert.alert('Lỗi', 'Không thể xoá nhật ký');
@@ -160,69 +136,78 @@ const HealthDiary = () => {
     ]);
   };
 
-  // Bắt đầu chỉnh sửa
-  const startEdit = (id, content, feelingValue) => {
-    Alert.alert(
-      'Xác nhận chỉnh sửa',
-      'Bạn có muốn chỉnh sửa nhật ký này không?',
-      [
-        {
-          text: 'Không',
-          style: 'cancel',
-        },
-        {
-          text: 'Có',
-          onPress: () => {
-            setEditId(id);
-            setText(content);
-            setFeeling(feelingValue);
-          },
-        },
-      ],
-      { cancelable: true }
-    );
+  // Bắt đầu chỉnh sửa nhật ký
+  const startEdit = (id, content, feeling) => {
+    setEditId(id);
+    setText(content);
+    setFeeling(feeling);
   };
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text variant="titleLarge" style={styles.header}>
-          Chia sẻ cảm xúc của bạn
+
+  // Render từng item nhật ký
+  const renderItem = ({ item }) => (
+    <Card style={styles.card}>
+      <View style={styles.cardHeader}>
+        <Text style={styles.dateText}>
+          {item.date ? new Date(item.date).toLocaleString() : 'Không rõ ngày'}
         </Text>
+        <View style={styles.cardActions}>
+          <IconButton
+            icon="pencil"
+            size={20}
+            onPress={() => startEdit(item.id, item.content, item.feeling)}
+            disabled={loading}
+          />
+          <IconButton
+            icon="delete"
+            size={20}
+            onPress={() => deleteEntry(item.id)}
+            disabled={loading}
+          />
+        </View>
+      </View>
+      <Text style={styles.cardContent}>{item.content}</Text>
+      <Text style={styles.cardFeeling}>Cảm xúc: {item.feeling}</Text>
+    </Card>
+  );
 
-        <TextInput
-          label="Viết cảm nhận sau buổi tập..."
-          mode="outlined"
-          multiline
-          numberOfLines={5}
-          value={text}
-          onChangeText={setText}
-          style={styles.input}
-          placeholder="Hôm nay bạn cảm thấy thế nào?"
-          editable={!loading}
-          outlineColor="#ccc"           // Màu viền bình thường
-          activeOutlineColor="#B00000" 
-        />
+  // Header component: phần nhập liệu + nút lưu nhật ký
+  const ListHeader = () => (
+    <>
+      <Text variant="titleLarge" style={styles.header}>
+        Chia sẻ cảm xúc của bạn
+      </Text>
 
-        <TextInput
-          label="Cảm xúc (ví dụ: Tốt, Mệt mỏi, Vui vẻ)"
-          mode="outlined"
-          value={feeling}
-          onChangeText={setFeeling}
-          style={styles.input}
-          placeholder="Nhập cảm xúc của bạn"
-          editable={!loading}
-          outlineColor="#ccc"           // Màu viền bình thường
-          activeOutlineColor="#B00000" 
-        />
+      <TextInput
+        label="Viết cảm nhận sau buổi tập..."
+        mode="outlined"
+        multiline
+        numberOfLines={5}
+        value={text}
+        onChangeText={setText}
+        style={styles.input}
+        placeholder="Hôm nay bạn cảm thấy thế nào?"
+        editable={!loading}
+        outlineColor="#ccc"
+        activeOutlineColor="#B00000"
+      />
 
-        <Button mode="contained" onPress={saveEntry} style={styles.button} disabled={loading}>
-          {editId ? 'Cập nhật nhật ký' : 'Lưu nhật ký'}
-        </Button>
-        {editId && (
-          <Button
+      <TextInput
+        label="Cảm xúc (ví dụ: Tốt, Mệt mỏi, Vui vẻ)"
+        mode="outlined"
+        value={feeling}
+        onChangeText={setFeeling}
+        style={styles.input}
+        placeholder="Nhập cảm xúc của bạn"
+        editable={!loading}
+        outlineColor="#ccc"
+        activeOutlineColor="#B00000"
+      />
+
+      <Button mode="contained" onPress={saveEntry} style={styles.button} disabled={loading}>
+        {editId ? 'Cập nhật nhật ký' : 'Lưu nhật ký'}
+      </Button>
+      {editId && (
+        <Button
           mode="outlined"
           onPress={() => {
             setEditId(null);
@@ -230,52 +215,39 @@ const HealthDiary = () => {
             setFeeling('');
           }}
           textColor="#B00000"
-          style={{ borderColor: '#B00000', borderWidth: 1, marginBottom:20 }}
+          style={{ borderColor: '#B00000', borderWidth: 1, marginBottom: 20 }}
         >
           Huỷ chỉnh sửa
         </Button>
-        )}
+      )}
+    </>
+  );
 
-        {loading && <ActivityIndicator size="large" style={{ marginVertical: 20 }} />}
-
-        {!loading && (diary.length === 0 ? (
-  <Text style={styles.emptyText}>Bạn chưa có nhật ký nào.</Text>
-) : (
-  <>
-    {diary.map(({ id, date, content, feeling }) => (
-      <Card key={id} style={styles.card}>
-        <View style={styles.cardHeader}>
-          <Text style={styles.dateText}>
-            {date ? new Date(date).toLocaleString() : 'Không rõ ngày'}
-          </Text>
-          <View style={styles.cardActions}>
-            <IconButton
-              icon="pencil"
-              size={20}
-              onPress={() => startEdit(id, content, feeling)}
-              disabled={loading}
-            />
-            <IconButton
-              icon="delete"
-              size={20}
-              onPress={() => deleteEntry(id)}
-              disabled={loading}
-            />
-          </View>
-        </View>
-        <Text style={styles.cardContent}>{content}</Text>
-        <Text style={styles.cardFeeling}>Cảm xúc: {feeling}</Text>
-      </Card>
-    ))}
-
-    {nextPage && !loading && (
-      <TouchableOpacity onPress={loadMoreDiary} style={styles.loadMoreBtn}>
-        <Text style={styles.loadMoreText}>Tải thêm...</Text>
-      </TouchableOpacity>
-    )}
-  </>
-))}
-      </ScrollView>
+  return (
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      style={styles.container}
+    >
+      {loading && !loadingMore ? (
+        <ActivityIndicator size="large" style={{ marginVertical: 20 }} />
+      ) : (
+        <FlatList
+          data={diary}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id.toString()}
+          ListHeaderComponent={ListHeader}
+          onEndReached={loadMoreDiary}
+          onEndReachedThreshold={0.5}
+          contentContainerStyle={{ paddingHorizontal: 20 }}
+          style={{ flex: 1 }}
+          ListEmptyComponent={
+            <Text style={styles.emptyText}>Bạn chưa có nhật ký nào.</Text>
+          }
+          ListFooterComponent={
+            loadingMore ? <ActivityIndicator style={{ marginVertical: 20 }} /> : null
+          }
+        />
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -284,27 +256,28 @@ const getStyles = () =>
   StyleSheet.create({
     container: {
       flex: 1,
-    },
-    scrollContent: {
-      padding: 20,
+        // thêm margin 2 bên cho toàn bộ container
     },
     header: {
-      marginBottom: 20,
-      fontSize:18,
+      marginBottom: 15,
+      marginTop:10,
+      fontSize: 18,
       textAlign: 'center',
       fontWeight: 'bold',
-      color: "#B00000"
+      color: '#B00000',
+      paddingHorizontal: 20,
     },
     input: {
       marginBottom: 16,
     },
     button: {
       marginBottom: 24,
-      backgroundColor: '#B00000'
+      backgroundColor: '#B00000',
     },
     emptyText: {
       textAlign: 'center',
       color: '#777',
+      marginTop: 20,
     },
     card: {
       marginBottom: 12,
@@ -327,13 +300,6 @@ const getStyles = () =>
     cardFeeling: {
       fontStyle: 'italic',
       color: '#666',
-    },
-    loadMoreBtn: {
-      marginTop: 16,
-      alignSelf: 'center',
-    },
-    loadMoreText: {
-      color: '#B00000',
     },
   });
 

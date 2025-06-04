@@ -1,7 +1,7 @@
-import React, { useEffect, useState, useContext } from "react";
+import React, { useState, useContext, useCallback } from "react";
 import { View, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Text, Card, Button } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { MyDispatchContext } from "../../configs/UserContext";
 import { authApis, endpoints } from "../../configs/Apis";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,21 +18,34 @@ const Profile = () => {
     nav.navigate("HomeStack");
   };
 
-  useEffect(() => {
-    const loadUser = async () => {
-      try {
-        const token = await AsyncStorage.getItem('token');
-        console.log("Token hiện tại:", token);
-        let res = await authApis(token).get(endpoints["current-user"]);
-        setUser(res.data);
-      } catch (err) {
-        console.error("Lỗi khi lấy thông tin user:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    loadUser();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadUser = async () => {
+        try {
+          setLoading(true);
+          const token = await AsyncStorage.getItem("token");
+          console.log("Token hiện tại:", token);
+          let res = await authApis(token).get(endpoints["current-user"]);
+          if (isActive) {
+            setUser(res.data);
+          }
+        } catch (err) {
+          console.error("Lỗi khi lấy thông tin user:", err);
+          if (isActive) setUser(null);
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      };
+
+      loadUser();
+
+      return () => {
+        isActive = false; // cleanup tránh setState khi unmounted
+      };
+    }, [])
+  );
 
   if (loading) {
     return (
@@ -64,22 +77,47 @@ const Profile = () => {
           )}
         </View>
         <Card.Content>
-          <Text style={styles.label}>Tên người dùng: <Text style={styles.value}>{user.username}</Text></Text>
-          <Text style={styles.label}>Email: <Text style={styles.value}>{user.email}</Text></Text>
-          <Text style={styles.label}>Họ: <Text style={styles.value}>{user.last_name}</Text></Text>
-          <Text style={styles.label}>Tên: <Text style={styles.value}>{user.first_name}</Text></Text>
-          <Text style={styles.label}>Vai trò: <Text style={styles.value}>
-          {user.role === 0
-            ? "Người dùng tự theo dõi"
-            : user.role === 1
-            ? "Người dùng kết nối với chuyên gia"
-            : "Huấn luyện viên"}
+          <Text style={styles.label}>
+            Tên người dùng: <Text style={styles.value}>{user.username}</Text>
+          </Text>
+          <Text style={styles.label}>
+            Email: <Text style={styles.value}>{user.email}</Text>
+          </Text>
+          <Text style={styles.label}>
+            Họ: <Text style={styles.value}>{user.last_name}</Text>
+          </Text>
+          <Text style={styles.label}>
+            Tên: <Text style={styles.value}>{user.first_name}</Text>
+          </Text>
+          <Text style={styles.label}>
+            Vai trò:{" "}
+            <Text style={styles.value}>
+              {user.role === 0
+                ? "Người dùng tự theo dõi"
+                : user.role === 1
+                ? "Người dùng kết nối với chuyên gia"
+                : "Huấn luyện viên"}
             </Text>
           </Text>
         </Card.Content>
         <Card.Actions style={styles.actions}>
-          <Button textColor="#B00000" style={{ borderColor: '#B00000', borderWidth: 1, marginLeft: 20, marginBottom:10 }} mode="outlined" onPress={() => nav.navigate("EditProfile")}>Chỉnh sửa</Button>
-          <Button buttonColor="#B00000" textColor="white" style={{marginRight: 20, marginBottom:10}} mode="contained" onPress={logout}>Đăng xuất</Button>
+          <Button
+            textColor="#B00000"
+            style={{ borderColor: "#B00000", borderWidth: 1, marginLeft: 20, marginBottom: 10 }}
+            mode="outlined"
+            onPress={() => nav.navigate("EditProfile", { userId: user.id })}
+          >
+            Chỉnh sửa
+          </Button>
+          <Button
+            buttonColor="#B00000"
+            textColor="white"
+            style={{ marginRight: 20, marginBottom: 10 }}
+            mode="contained"
+            onPress={logout}
+          >
+            Đăng xuất
+          </Button>
         </Card.Actions>
       </Card>
     </View>

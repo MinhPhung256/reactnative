@@ -67,7 +67,7 @@ export const endpoints = {
 'change-password': '/users/change-password/',
 'current-user': '/users/current/',
 'read-user': (userId) => `/users/${userId}/`,
-'update-user': (userId) => `/users/${userId}/update-info/`,
+'update-user':`/users/update-info/`,
 
 // workoutplan
 'workoutplan-list': '/workoutplan/',

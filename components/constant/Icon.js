@@ -19,8 +19,8 @@ export const iconItems = [
   },
   {
     icon: 'star-outline',
-    text: 'Thử thách bản thân',
-    screen: 'ChatScreen',
+    text: 'Mục tiêu',
+    screen: 'CreateGoal',
     requiresLogin: true,
   },
 ];

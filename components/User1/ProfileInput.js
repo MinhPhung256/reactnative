@@ -128,7 +128,6 @@ const HealthTracker = () => {
         renderItem={renderDeviceItem}
         ListHeaderComponent={
           <View style={styles.content}>
-            <Text style={styles.title}>Theo dõi sức khỏe</Text>
 
             <View style={styles.bmiContainer}>
               <Text style={styles.bmiTitle}>Chỉ số cơ thể (BMI)</Text>
@@ -147,7 +146,7 @@ const HealthTracker = () => {
 
             <Text style={{ marginTop: 12, marginBottom: 4, fontSize: 16 }}>Mục tiêu sức khỏe:</Text>
             <View style={[styles.input, { borderWidth: 1, borderColor: '#ccc', borderRadius: 10 }]}>
-              <Picker selectedValue={goal} onValueChange={setGoal} style={{ height: 50 }}>
+              <Picker selectedValue={goal} onValueChange={setGoal} >
                 <Picker.Item label="Giảm cân" value="Giảm cân" />
                 <Picker.Item label="Tăng cân" value="Tăng cân" />
                 <Picker.Item label="Giữ dáng" value="Giữ dáng" />
@@ -155,7 +154,7 @@ const HealthTracker = () => {
               </Picker>
             </View>
 
-            <View style={styles.card}>
+            {/* <View style={styles.card}>
               <Text style={styles.label}>Bước chân hôm nay: {steps}</Text>
               <Button title="+100 bước" onPress={() => setSteps((prev) => prev + 100)} />
             </View>
@@ -163,9 +162,9 @@ const HealthTracker = () => {
             <View style={styles.card}>
               <Text style={styles.label}>Nước đã uống: {water} ml</Text>
               <Button title="+250ml" onPress={() => setWater((prev) => prev + 250)} />
-            </View>
+            </View> */}
 
-            <View style={styles.card}>
+            {/* <View style={styles.card}>
               <Text style={styles.label}>Nhịp tim:</Text>
               <TextInput
                 style={styles.textInput}
@@ -175,9 +174,9 @@ const HealthTracker = () => {
                 placeholder="VD: 80"
                 keyboardType="numeric"
               />
-            </View>
+            </View> */}
 
-            <Text style={[styles.title, { marginTop: 24 }]}>Thiết bị đeo hỗ trợ</Text>
+            {/* <Text style={[styles.title, { marginTop: 24 }]}>Thiết bị đeo hỗ trợ</Text> */}
           </View>
         }
         ListFooterComponent={
@@ -215,13 +214,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   bmiTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+    color:'#B00000'
   },
   bmi: {
     fontSize: 36,
     fontWeight: 'bold',
-    color: '#4caf50',
+    color: '#B00000',
   },
   bmiStatus: {
     fontSize: 16,

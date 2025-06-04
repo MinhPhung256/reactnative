@@ -29,6 +29,7 @@ import Water from "./components/User1/Water";
 import HealthView from "./components/User1/HealthView";
 import Connection from "./components/User1/Connection";
 import EditProfile from "./components/User/EditProfile";
+import CreateGoal from "./components/User1/Goal";
 
 const Stack = createNativeStackNavigator();
 
@@ -83,6 +84,7 @@ const HomeStack = () => {
       <Stack.Screen name="MealPlan" component={MealPlan} options={{title: "THỰC ĐƠN DINH DƯỠNG"}}/>
       <Stack.Screen name="WorkoutPlan" component={WorkoutPlan} options={{title: "LỊCH TẬP LUYỆN"}}/>
       <Stack.Screen name="ActivityDetail" component={ActivityDetail} options={{title: "HOẠT ĐỘNG"}}/>
+      <Stack.Screen name="CreateGoal" component={CreateGoal} options={{title: "MỤC TIÊU"}}/>
 
     </Stack.Navigator>
   );
@@ -104,7 +106,7 @@ const ProfileStack = () => {
       }}
     >
           <Stack.Screen name="Profile" component={Profile} options={{ title: 'TÀI KHOẢN', headerBackVisible: false }} />
-          <Stack.Screen name="EditProfile" component={EditProfile} options={{ title: 'Chỉnh sửa thôgn tin' }} />
+          <Stack.Screen name="EditProfile" component={EditProfile} options={{ title: 'Chỉnh sửa thông tin' }} />
 
       </Stack.Navigator>
   );
