@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.82.143:8000/';
+const BASE_URL = 'http://192.168.1.228:8000/';
 
 export const endpoints = {
   'login': '/o/token/', 
@@ -117,6 +117,21 @@ export const disconnectExpert = async (token, connectionId) => {
     throw error;
   }
 };
+
+
+
+export const createOrUpdateWorkoutPlan = async (token, date, workouts) => {
+  try {
+    const api = authApis(token);
+    const payload = { date, workouts };
+    const res = await api.post(endpoints['workoutplan-create'], payload);
+    return res.data;
+  } catch (error) {
+    console.error("Lỗi lưu kế hoạch luyện tập:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
 
 export const authApis = (token) => {
   return axios.create({

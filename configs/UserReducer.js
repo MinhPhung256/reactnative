@@ -6,7 +6,13 @@ export default (current, action) => {
             return action.payload;
         case 'logout':
             AsyncStorage.removeItem('token');
-            return null
-    }
+            return null;
+        case 'update-profile':
+                return {
+                  ...current,
+                  ...action.payload,
+                  avatar_url: action.payload.avatar?.uri || current.avatar_url,
+                }
+        }
     return current;
 }

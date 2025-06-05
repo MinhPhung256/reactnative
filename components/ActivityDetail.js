@@ -13,7 +13,7 @@ const ActivityDetail = ({ route, navigation }) => {
     <ScrollView style={{ flex: 1, padding:15 }}>
       <Card style={{ backgroundColor: '#FFEBEE' }}>
         <Card.Title title={activity.title} subtitle={`${formattedDate} | ${timeRange}`} />
-        <Card.Cover source={{ uri: activity.image }} />
+        <Card.Cover source={{ uri: activity.image_url }} />
         <Card.Content style={{ marginTop: 16 }}>
           <Text variant="bodyLarge">{activity.description}</Text>
           <Text style={{ marginTop: 12, fontStyle: 'italic', color: '#666' }}>

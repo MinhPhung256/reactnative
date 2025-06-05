@@ -1,53 +1,41 @@
 import React, { useEffect, useState } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Avatar, Button, Card, Text, ActivityIndicator, List } from 'react-native-paper';
-import axios from 'axios';
+import { Avatar, Button, Card, Text, ActivityIndicator } from 'react-native-paper';
+import { getCurrentUser, connectExpert, disconnectExpert, authApis, endpoints } from '../../configs/Apis'; // Đường dẫn tuỳ vào project của bạn
 
-const MOCK_EXPERTS = [
-  {
-    id: 1,
-    name: 'Nguyễn Văn A',
-    specialty: 'Huấn luyện viên thể hình',
-    experience: 5,
-    description: 'Chuyên giảm mỡ, tăng cơ và thiết kế bài tập phù hợp.',
-    avatar_url: 'https://i.pravatar.cc/150?img=1',
-  },
-  {
-    id: 2,
-    name: 'Trần Thị B',
-    specialty: 'Chuyên gia dinh dưỡng',
-    experience: 3,
-    description: 'Tư vấn thực đơn giảm cân, tăng cân khoa học.',
-    avatar_url: 'https://i.pravatar.cc/150?img=2',
-  },
-];
-
-const ExpertInfo = ({ navigation }) => {
+const ExpertInfo = ({ navigation, token }) => {
   const [currentExpert, setCurrentExpert] = useState(null);
   const [loading, setLoading] = useState(true);
   const [availableExperts, setAvailableExperts] = useState([]);
+  const [connectionId, setConnectionId] = useState(null);
 
-  useEffect(() => {
-    fetchExpert();
-  }, []);
+ 
 
-  const fetchExpert = async () => {
+  const loadExpert = async () => {
+    setLoading(true);
     try {
-      // Giả lập API
-      const res = await axios.get('https://your-api.com/api/current-expert', {
-        headers: {
-          Authorization: `Bearer YOUR_ACCESS_TOKEN`,
-        },
-      });
-      setCurrentExpert(res.data);
-    } catch (error) {
-      // Nếu không có chuyên gia hiện tại → dùng danh sách mẫu
-      setCurrentExpert(null);
-      setAvailableExperts(MOCK_EXPERTS);
+      const api = authApis(token);
+      const res = await api.get(endpoints['connection-list']);
+      if (res.data.length > 0) {
+        const connection = res.data[0];
+        setCurrentExpert(connection.expert);
+        setConnectionId(connection.id);
+      } else {
+        // 2. Nếu chưa có → lấy danh sách user role Coach
+        const resUsers = await api.get(endpoints['get-all-users']);
+        const coaches = resUsers.data.filter(user => user.role === 3); // Coach = 2
+        setAvailableExperts(coaches);
+      }
+    } catch (err) {
+      console.error('Lỗi khi lấy chuyên gia:', err);
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadExpert();
+  }, []);
 
   const handleDisconnect = () => {
     Alert.alert('Xác nhận', 'Bạn muốn ngắt kết nối với chuyên gia?', [
@@ -55,10 +43,14 @@ const ExpertInfo = ({ navigation }) => {
       {
         text: 'Ngắt kết nối',
         onPress: async () => {
-          await axios.post('https://your-api.com/api/disconnect-expert', {}, {
-            headers: { Authorization: `Bearer YOUR_ACCESS_TOKEN` },
-          });
-          fetchExpert();
+          try {
+            await disconnectExpert(token, connectionId);
+            setCurrentExpert(null);
+            setConnectionId(null);
+            loadExpert();
+          } catch (err) {
+            Alert.alert('Lỗi', 'Không thể ngắt kết nối');
+          }
         },
       },
     ]);
@@ -70,13 +62,14 @@ const ExpertInfo = ({ navigation }) => {
       {
         text: 'Kết nối',
         onPress: async () => {
-          await axios.post('https://your-api.com/api/connect-expert', {
-            expert_id: expert.id,
-          }, {
-            headers: { Authorization: `Bearer YOUR_ACCESS_TOKEN` },
-          });
-          setCurrentExpert(expert);
-          setAvailableExperts([]);
+          try {
+            const connection = await connectExpert(token, expert.id);
+            setCurrentExpert(connection.expert);
+            setConnectionId(connection.id);
+            setAvailableExperts([]);
+          } catch (err) {
+            Alert.alert('Lỗi', 'Không thể kết nối');
+          }
         },
       },
     ]);
@@ -90,23 +83,22 @@ const ExpertInfo = ({ navigation }) => {
         <Card style={styles.card}>
           <Card.Title
             title={currentExpert.name}
-            subtitle={currentExpert.specialty}
+            subtitle={currentExpert.specialty || 'Chuyên gia'}
             left={() => (
-              <Avatar.Image size={60} source={{ uri: currentExpert.avatar_url }} />
+              <Avatar.Image size={60} source={{ uri: currentExpert.avatar_url || 'https://i.pravatar.cc/150' }} />
             )}
           />
           <Card.Content>
             <Text>Mô tả:</Text>
-            <Text>{currentExpert.description}</Text>
+            <Text>{currentExpert.description || 'Không có mô tả'}</Text>
             <Text style={{ marginTop: 5 }}>
-              💼 Kinh nghiệm: {currentExpert.experience} năm
+              💼 Kinh nghiệm: {currentExpert.experience || 0} năm
             </Text>
           </Card.Content>
           <Card.Actions style={styles.actions}>
             <Button mode="contained" onPress={() => navigation.navigate('ChatScreen')}>
               💬 Nhắn tin
             </Button>
-            <Button onPress={() => setCurrentExpert(null)}>🔁 Đổi</Button>
             <Button onPress={handleDisconnect} textColor="red">
               ❌ Ngắt kết nối
             </Button>
@@ -115,24 +107,26 @@ const ExpertInfo = ({ navigation }) => {
       ) : (
         <View>
           <Text style={styles.noExpertText}>
-            Bạn chưa kết nối với chuyên gia nào. Chọn 1 chuyên gia bên dưới:
+            Bạn chưa kết nối với chuyên gia nào. Hãy chọn 1 chuyên gia bên dưới:
           </Text>
           {availableExperts.map((expert) => (
             <Card key={expert.id} style={styles.card}>
               <Card.Title
                 title={expert.name}
-                subtitle={expert.specialty}
+                subtitle={expert.specialty || 'Chuyên gia'}
                 left={() => (
-                  <Avatar.Image size={50} source={{ uri: expert.avatar_url }} />
+                  <Avatar.Image size={50} source={{ uri: expert.avatar_url || 'https://i.pravatar.cc/150' }} />
                 )}
               />
               <Card.Content>
-                <Text>{expert.description}</Text>
-                <Text style={{ marginTop: 4 }}>Kinh nghiệm: {expert.experience} năm</Text>
+                <Text>{expert.description || 'Không có mô tả'}</Text>
+                <Text style={{ marginTop: 4 }}>
+                  Kinh nghiệm: {expert.experience || 0} năm
+                </Text>
               </Card.Content>
               <Card.Actions>
                 <Button mode="contained" onPress={() => handleConnect(expert)}>
-                  🔗 Kết nối
+                  Kết nối
                 </Button>
               </Card.Actions>
             </Card>
@@ -155,8 +149,10 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   noExpertText: {
-    fontSize: 16,
+    fontSize: 18,
     marginBottom: 16,
+    textAlign: 'center',
+    color:'#B00000'
   },
 });
 

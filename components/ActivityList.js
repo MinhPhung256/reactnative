@@ -14,7 +14,7 @@ const ActivityCard = ({ activity, onPress }) => (
         <Text variant="titleLarge">{activity.name}</Text>
         <Text variant="bodyMedium">{activity.description}</Text>
       </Card.Content>
-      <Card.Cover source={{ uri: activity.image }} />
+      <Card.Cover source={{ uri: activity.image_url }} />
       <Card.Actions>
         <Button style={{ backgroundColor: '#B00000' }} labelStyle={{ color: 'white' }} onPress={() => onPress(activity)}>Xem</Button>
       </Card.Actions>
