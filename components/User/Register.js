@@ -212,8 +212,8 @@ const Register = () =>{
             {user?.avatar && <Image source={{uri: user.avatar.uri}} style={[MyStyles.logo, MyStyles.margin]}/>}
                 <RadioButton.Group value={user.role} onValueChange={value => setState(value, 'role')}>
                 <RadioButton.Item label="Người dùng tự theo dõi" value="1" color='#B00000'/>
-  <RadioButton.Item label="Người dùng kết nối chuyên gia" value="2" color='#B00000'/>
-  <RadioButton.Item label="Huấn luyện viên" value="3" color='#B00000'/>
+                <RadioButton.Item label="Người dùng kết nối chuyên gia" value="2" color='#B00000'/>
+                <RadioButton.Item label="Huấn luyện viên" value="3" color='#B00000'/>
                 </RadioButton.Group>
             <Button style={{backgroundColor:"#B00000"}} disabled={loading} loading ={loading} onPress={register}mode="contained">Đăng ký</Button>
             

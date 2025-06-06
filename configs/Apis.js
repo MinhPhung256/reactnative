@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = 'http://192.168.1.228:8000/';
+const BASE_URL = 'http://192.168.3.22:8000/';
 
 export const endpoints = {
   'login': '/o/token/', 
@@ -49,18 +49,7 @@ export const endpoints = {
 // healthrecord
 'healthrecord-list': '/healthrecord/',
 'healthrecord-create': '/healthrecord/',
-'healthrecord-read': (recordId) => `/healthrecord/${recordId}/`,
-'healthrecord-update': (recordId) => `/healthrecord/${recordId}/`,
-'healthrecord-partial-update': (recordId) => `/healthrecord/${recordId}/`,
-'healthrecord-delete': (recordId) => `/healthrecord/${recordId}/`,
 
-// tag
-'tag-list': '/tag/',
-'tag-create': '/tag/',
-'tag-read': (tagId) => `/tag/${tagId}/`,
-'tag-update': (tagId) => `/tag/${tagId}/`,
-'tag-partial-update': (tagId) => `/tag/${tagId}/`,
-'tag-delete': (tagId) => `/tag/${tagId}/`,
 
 // user
 'get-all-users': '/users/all-users/',
@@ -80,46 +69,6 @@ export const endpoints = {
 
 
 
-// 1. Lấy thông tin user hiện tại
-export const getCurrentUser = async (token) => {
-  try {
-    const api = authApis(token);
-    const response = await api.get(endpoints['current-user']);
-    return response.data;  // trả về object user
-  } catch (error) {
-    console.error('Lỗi lấy profile:', error);
-    throw error;
-  }
-};
-
-// 2. Kết nối chuyên gia (tạo connection mới)
-export const connectExpert = async (token, expertId) => {
-  try {
-    const api = authApis(token);
-    // giả sử API connection-create nhận { expert_id }
-    const response = await api.post(endpoints['connection-create'], { expert_id: expertId });
-    return response.data;  // trả về connection mới
-  } catch (error) {
-    console.error('Lỗi kết nối chuyên gia:', error);
-    throw error;
-  }
-};
-
-// 3. Ngắt kết nối chuyên gia (xóa connection theo id)
-export const disconnectExpert = async (token, connectionId) => {
-  try {
-    const api = authApis(token);
-    const url = endpoints['connection-delete'](connectionId);
-    await api.delete(url);
-    return true;
-  } catch (error) {
-    console.error('Lỗi ngắt kết nối chuyên gia:', error);
-    throw error;
-  }
-};
-
-
-
 export const createOrUpdateWorkoutPlan = async (token, date, workouts) => {
   try {
     const api = authApis(token);
@@ -128,6 +77,20 @@ export const createOrUpdateWorkoutPlan = async (token, date, workouts) => {
     return res.data;
   } catch (error) {
     console.error("Lỗi lưu kế hoạch luyện tập:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const changePassword = async (token, currentPassword, newPassword) => {
+  try {
+    const api = authApis(token);
+    const res = await api.post(endpoints['change-password'], {
+      old_password: currentPassword,
+      new_password: newPassword
+    });
+    return res.data;
+  } catch (error) {
+    console.error("Lỗi đổi mật khẩu:", error.response?.data || error.message);
     throw error;
   }
 };

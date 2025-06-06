@@ -1,23 +1,64 @@
-import React, { useContext } from "react";
-import { View, StyleSheet, Image } from "react-native";
+import React, { useState, useContext, useCallback } from "react";
+import { View, StyleSheet, Image, ActivityIndicator } from "react-native";
 import { Text, Card, Button } from "react-native-paper";
-import { useNavigation } from "@react-navigation/native";
-import { MyDispatchContext, MyUserContext } from "../../configs/UserContext";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
+import { MyDispatchContext } from "../../configs/UserContext";
+import { authApis, endpoints } from "../../configs/Apis";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Profile = () => {
-  const nav = useNavigation();
-  const user = useContext(MyUserContext);
   const dispatch = useContext(MyDispatchContext);
+  const nav = useNavigation();
+
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const logout = () => {
     dispatch({ type: "logout" });
-    nav.navigate("HomeStack");
+    nav.navigate("HomeStack", { screen: "Dashboard" });
   };
+
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+
+      const loadUser = async () => {
+        try {
+          setLoading(true);
+          const token = await AsyncStorage.getItem("token");
+          console.log("Token hiện tại:", token);
+          let res = await authApis(token).get(endpoints["current-user"]);
+          if (isActive) {
+            setUser(res.data);
+          }
+        } catch (err) {
+          console.error("Lỗi khi lấy thông tin user:", err);
+          if (isActive) setUser(null);
+        } finally {
+          if (isActive) setLoading(false);
+        }
+      };
+
+      loadUser();
+
+      return () => {
+        isActive = false; 
+      };
+    }, [])
+  );
+
+  if (loading) {
+    return (
+      <View style={styles.center}>
+        <ActivityIndicator size="large" color="blue" />
+      </View>
+    );
+  }
 
   if (!user) {
     return (
       <View style={styles.center}>
-        <Text style={styles.label}>ĐÃ ĐĂNG XUẤT</Text>
+        <Text>Không thể tải thông tin người dùng.</Text>
       </View>
     );
   }
@@ -27,7 +68,7 @@ const Profile = () => {
       <Card>
         <View style={styles.avatarContainer}>
           {user.avatar ? (
-            <Image source={{ uri:user.avatar_url}} style={styles.avatar} />
+            <Image source={{ uri: user.avatar_url }} style={styles.avatar} />
           ) : (
             <Image
               source={require("../../assets/Images/default_avatar.jpg")}
@@ -55,19 +96,16 @@ const Profile = () => {
                 ? "Người dùng tự theo dõi"
                 : user.role === 2
                 ? "Người dùng kết nối với chuyên gia"
-                : "Chuyên gia dinh dưỡng"}
+                : user.role == 3
+                ? "Huấn luyện viên"
+                : "Khác"}
             </Text>
           </Text>
         </Card.Content>
         <Card.Actions style={styles.actions}>
           <Button
             textColor="#B00000"
-            style={{
-              borderColor: "#B00000",
-              borderWidth: 1,
-              marginLeft: 20,
-              marginBottom: 10,
-            }}
+            style={{ borderColor: "#B00000", borderWidth: 1, marginLeft: 20, marginBottom: 10 }}
             mode="outlined"
             onPress={() => nav.navigate("EditProfile", { userId: user.id })}
           >

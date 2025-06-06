@@ -1,33 +1,19 @@
-import React, { useState } from 'react';
-import {View, StyleSheet, TextInput, Text, Button, ActivityIndicator, Platform, KeyboardAvoidingView, FlatList, Alert,
-} from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, Text, Button, ActivityIndicator, Platform, KeyboardAvoidingView, FlatList, Alert } from 'react-native';
 import { TextInput as PaperTextInput, Button as PaperButton, HelperText } from 'react-native-paper';
-import { Picker } from '@react-native-picker/picker';
-import { useNavigation } from '@react-navigation/native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { authApis, endpoints } from '../../configs/Apis';
-
-const devices = [
-  { id: '1', name: 'Fitbit' },
-  { id: '2', name: 'Apple Watch' },
-  { id: '3', name: 'Xiaomi Mi Band' },
-  { id: '4', name: 'Samsung Galaxy Watch' },
-];
 
 const HealthTracker = () => {
   const [height, setHeight] = useState('');
   const [weight, setWeight] = useState('');
-  const [age, setAge] = useState('');
   const [goal, setGoal] = useState('Giữ dáng');
   const [steps, setSteps] = useState(0);
   const [water, setWater] = useState(0);
   const [heartRate, setHeartRate] = useState('');
-  const [connectedDevice, setConnectedDevice] = useState(null);
   const [msg, setMsg] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [editId, setEditId] = useState(null);
-
-  const navigation = useNavigation();
+  const [healthRecords, setHealthRecords] = useState([]);
 
   const bmi = height && weight && !isNaN(height) && !isNaN(weight)
     ? (weight / ((height / 100) ** 2)).toFixed(1)
@@ -43,17 +29,36 @@ const HealthTracker = () => {
   };
 
   const validate = () => {
-    if (!height || !weight || !age) {
-      setMsg('Vui lòng nhập đầy đủ thông tin cá nhân!');
+    if (!height || !weight) {
+      setMsg('Vui lòng nhập đầy đủ thông tin chiều cao và cân nặng!');
       return false;
     }
-    if (isNaN(height) || isNaN(weight) || isNaN(age)) {
-      setMsg('Chiều cao, cân nặng hoặc tuổi không hợp lệ!');
+    if (isNaN(height) || isNaN(weight)) {
+      setMsg('Chiều cao hoặc cân nặng không hợp lệ!');
       return false;
     }
     setMsg(null);
     return true;
   };
+
+  const fetchRecords = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      if (!token) throw new Error('No token found');
+
+      const api = authApis(token);
+      const res = await api.get(endpoints['healthrecord-list']);
+
+      setHealthRecords(res.data);
+    } catch (err) {
+      console.error(err);
+      Alert.alert('Lỗi', 'Không thể tải dữ liệu sức khỏe!');
+    }
+  };
+
+  useEffect(() => {
+    fetchRecords();
+  }, []);
 
   const handleSubmit = async () => {
     if (!validate()) return;
@@ -63,36 +68,26 @@ const HealthTracker = () => {
       const token = await AsyncStorage.getItem('token');
       if (!token) throw new Error('No token found');
 
+      const api = authApis(token);
+
       const data = {
         height: parseFloat(height),
         weight: parseFloat(weight),
-        age: parseInt(age),
-        goal,
-        steps,
-        water,
-        heart_rate: connectedDevice && heartRate ? parseInt(heartRate) : null,
-        connected_device: connectedDevice,
-        bmi: parseFloat(bmi),
+        steps: steps,
+        water_intake: water,
+        heart_rate: parseInt(heartRate),
       };
 
-      if (editId) {
-        await authApis(token).put(endpoints['healthrecord-update'](editId), data);
-        Alert.alert('Thành công', 'Đã cập nhật thông tin!');
-      } else {
-        await authApis(token).post(endpoints['healthrecord-create'], data);
-        Alert.alert('Thành công', 'Đã lưu thông tin!');
-      }
+      await api.post(endpoints['healthrecord-create'], data);
+
+      await fetchRecords();
 
       setHeight('');
       setWeight('');
-      setAge('');
       setGoal('Giữ dáng');
       setSteps(0);
       setWater(0);
       setHeartRate('');
-      setConnectedDevice(null);
-      setEditId(null);
-      navigation.navigate('HealthView');
     } catch (err) {
       console.error(err);
       Alert.alert('Lỗi', 'Không thể lưu dữ liệu!');
@@ -101,98 +96,59 @@ const HealthTracker = () => {
     }
   };
 
-  const renderDeviceItem = ({ item }) => {
-    const isConnected = connectedDevice === item.name;
-    return (
-      <View style={styles.deviceCard}>
-        <Text style={styles.deviceName}>{item.name}</Text>
-        <Text style={{ color: isConnected ? 'green' : 'gray' }}>
-          {isConnected ? 'Đã kết nối' : 'Chưa kết nối'}
-        </Text>
-        <Button
-          title={isConnected ? 'Ngắt kết nối' : 'Kết nối'}
-          onPress={() => {
-            setConnectedDevice(isConnected ? null : item.name);
-            setHeartRate(isConnected ? '' : '80');
-          }}
-        />
-      </View>
-    );
-  };
+  const renderRecordItem = ({ item }) => (
+    <View style={styles.card}>
+      <Text style={styles.label}>Chiều cao: {item.height} cm</Text>
+      <Text style={styles.label}>Cân nặng: {item.weight} kg</Text>
+      <Text style={styles.label}>Bước chân: {item.steps}</Text>
+      <Text style={styles.label}>Nước uống: {item.water_intake} ml</Text>
+      <Text style={styles.label}>Nhịp tim: {item.heart_rate}</Text>
+    </View>
+  );
 
   return (
     <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
       <FlatList
-        data={devices}
-        keyExtractor={(item) => item.id}
-        renderItem={renderDeviceItem}
         ListHeaderComponent={
           <View style={styles.content}>
-
             <View style={styles.bmiContainer}>
               <Text style={styles.bmiTitle}>Chỉ số cơ thể (BMI)</Text>
               <Text style={styles.bmi}>{bmi}</Text>
               <Text style={styles.bmiStatus}>{getBmiStatus()}</Text>
             </View>
 
-            <HelperText type="error" visible={msg}>{msg}</HelperText>
+            <HelperText type="error" visible={!!msg}>{msg}</HelperText>
 
-            <PaperTextInput label="Chiều cao (cm)" keyboardType="numeric" value={height} onChangeText={setHeight}
-              mode="outlined" style={styles.input} theme={{ colors: { primary: '#B00000' } }} />
-            <PaperTextInput label="Cân nặng (kg)" keyboardType="numeric" value={weight} onChangeText={setWeight}
-              mode="outlined" style={styles.input} theme={{ colors: { primary: '#B00000' } }} />
-            <PaperTextInput label="Tuổi" keyboardType="numeric" value={age} onChangeText={setAge}
-              mode="outlined" style={styles.input} theme={{ colors: { primary: '#B00000' } }} />
+            <PaperTextInput label="Chiều cao (cm)" keyboardType="numeric" value={height} onChangeText={setHeight} mode="outlined" style={styles.input} theme={{ colors: { primary: '#B00000' } }} />
+            <PaperTextInput label="Cân nặng (kg)" keyboardType="numeric" value={weight} onChangeText={setWeight} mode="outlined" style={styles.input} theme={{ colors: { primary: '#B00000' } }} />
+            <PaperTextInput label="Nhịp tim" keyboardType="numeric" value={heartRate} onChangeText={setHeartRate} mode="outlined" style={styles.input} theme={{ colors: { primary: '#B00000' } }} />
 
-            <Text style={{ marginTop: 12, marginBottom: 4, fontSize: 16 }}>Mục tiêu sức khỏe:</Text>
-            <View style={[styles.input, { borderWidth: 1, borderColor: '#ccc', borderRadius: 10 }]}>
-              <Picker selectedValue={goal} onValueChange={setGoal} >
-                <Picker.Item label="Giảm cân" value="Giảm cân" />
-                <Picker.Item label="Tăng cân" value="Tăng cân" />
-                <Picker.Item label="Giữ dáng" value="Giữ dáng" />
-                <Picker.Item label="Khác" value="Khác" />
-              </Picker>
-            </View>
-
-            {/* <View style={styles.card}>
+            <View style={styles.card}>
               <Text style={styles.label}>Bước chân hôm nay: {steps}</Text>
-              <Button title="+100 bước" onPress={() => setSteps((prev) => prev + 100)} />
+              <Button title="+100 bước" onPress={() => setSteps(prev => prev + 100)} />
             </View>
 
             <View style={styles.card}>
               <Text style={styles.label}>Nước đã uống: {water} ml</Text>
-              <Button title="+250ml" onPress={() => setWater((prev) => prev + 250)} />
-            </View> */}
+              <Button title="+250ml" onPress={() => setWater(prev => prev + 250)} />
+            </View>
 
-            {/* <View style={styles.card}>
-              <Text style={styles.label}>Nhịp tim:</Text>
-              <TextInput
-                style={styles.textInput}
-                value={heartRate}
-                onChangeText={setHeartRate}
-                editable={connectedDevice !== null}
-                placeholder="VD: 80"
-                keyboardType="numeric"
-              />
-            </View> */}
-
-            {/* <Text style={[styles.title, { marginTop: 24 }]}>Thiết bị đeo hỗ trợ</Text> */}
-          </View>
-        }
-        ListFooterComponent={
-          <>
             <PaperButton
               mode="contained"
               onPress={handleSubmit}
-              style={{ margin: 20, backgroundColor: '#B00000' }}
+              style={{ marginTop: 20, backgroundColor: '#B00000' }}
               disabled={loading}
             >
-              {editId ? 'Cập nhật' : 'Lưu thông tin'}
+              Lưu thông tin
             </PaperButton>
-            {loading && <ActivityIndicator style={{ marginBottom: 20 }} />}
-          </>
+
+            {loading && <ActivityIndicator style={{ marginTop: 10 }} />}
+          </View>
         }
-        contentContainerStyle={{ paddingBottom: 30 }}
+        data={healthRecords}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderRecordItem}
+        contentContainerStyle={{ padding: 20, paddingBottom: 30 }}
       />
     </KeyboardAvoidingView>
   );
@@ -202,13 +158,6 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
   },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    color: '#B00000',
-    textAlign: 'center',
-    marginBottom: 16,
-  },
   bmiContainer: {
     alignItems: 'center',
     marginBottom: 20,
@@ -216,7 +165,7 @@ const styles = StyleSheet.create({
   bmiTitle: {
     fontSize: 18,
     fontWeight: 'bold',
-    color:'#B00000'
+    color: '#B00000',
   },
   bmi: {
     fontSize: 36,
@@ -239,23 +188,6 @@ const styles = StyleSheet.create({
   },
   label: {
     marginBottom: 8,
-    fontWeight: 'bold',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    borderRadius: 10,
-  },
-  deviceCard: {
-    backgroundColor: '#f9f9f9',
-    padding: 16,
-    borderRadius: 10,
-    marginHorizontal: 20,
-    marginBottom: 12,
-  },
-  deviceName: {
-    fontSize: 18,
     fontWeight: 'bold',
   },
 });

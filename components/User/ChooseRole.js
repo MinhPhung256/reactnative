@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, Modal, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import { authApis, endpoints } from '../../configs/Apis'; 
+import { authApis, endpoints } from '../../configs/Apis';
 
 const ChooseRole = ({ visible, onClose, currentRole, token }) => {
   const [selectedRole, setSelectedRole] = useState(null);
@@ -17,18 +17,20 @@ const ChooseRole = ({ visible, onClose, currentRole, token }) => {
     }
   }, [currentRole, visible]);
 
-  const handleConfirm = async () => {
-    if (!selectedRole) return;
+  const handleSelectRole = async (role) => {
+    setSelectedRole(role);
 
-    if (
-      (selectedRole === 'user' && currentRole === 1) ||
-      (selectedRole === 'expert' && currentRole === 2)
-    ) {
+    const newRoleNumber = role === 'user' ? 1 : 2;
+
+    if (newRoleNumber === currentRole) {
       onClose();
+      if (newRoleNumber === 1) {
+        navigation.navigate('HomeStack');
+      } else {
+        navigation.navigate('HomeCoach');
+      }
       return;
     }
-
-    const newRoleNumber = selectedRole === 'user' ? 1 : 2;
 
     try {
       const api = authApis(token);
@@ -38,11 +40,10 @@ const ChooseRole = ({ visible, onClose, currentRole, token }) => {
 
       if (response.status === 200) {
         onClose();
-
         if (newRoleNumber === 1) {
           navigation.navigate('HomeStack');
         } else {
-          navigation.navigate('HomeCoach');
+          navigation.navigate('HomeUser');
         }
       } else {
         Alert.alert('Lỗi', 'Cập nhật vai trò thất bại, vui lòng thử lại.');
@@ -61,7 +62,7 @@ const ChooseRole = ({ visible, onClose, currentRole, token }) => {
 
           <TouchableOpacity
             style={[styles.optionButton, selectedRole === 'user' && styles.selectedButton]}
-            onPress={() => setSelectedRole('user')}
+            onPress={() => handleSelectRole('user')}
           >
             <Text style={[styles.optionText, selectedRole === 'user' && styles.selectedText]}>
               Tự theo dõi
@@ -70,29 +71,16 @@ const ChooseRole = ({ visible, onClose, currentRole, token }) => {
 
           <TouchableOpacity
             style={[styles.optionButton, selectedRole === 'expert' && styles.selectedButton]}
-            onPress={() => setSelectedRole('expert')}
+            onPress={() => handleSelectRole('expert')}
           >
             <Text style={[styles.optionText, selectedRole === 'expert' && styles.selectedText]}>
               Kết nối chuyên gia
             </Text>
           </TouchableOpacity>
 
-          <View style={styles.buttonsRow}>
-            <TouchableOpacity
-              style={[styles.cancelButton]}
-              onPress={onClose}
-            >
-              <Text style={styles.cancelText}>Hủy</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={[styles.confirmButton, !selectedRole && styles.confirmButtonDisabled]}
-              onPress={handleConfirm}
-              disabled={!selectedRole}
-            >
-              <Text style={styles.confirmText}>Xác nhận</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.cancelButton} onPress={onClose}>
+            <Text style={styles.cancelText}>Hủy</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </Modal>
@@ -141,15 +129,9 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-  buttonsRow: {
-    flexDirection: 'row',
-    marginTop: 20,
-    width: '100%',
-    justifyContent: 'space-between',
-  },
   cancelButton: {
-    flex: 1,
-    marginRight: 10,
+    marginTop: 15,
+    width: '100%',
     backgroundColor: '#FFEBEE',
     paddingVertical: 12,
     borderRadius: 8,
@@ -157,21 +139,6 @@ const styles = StyleSheet.create({
   },
   cancelText: {
     color: '#B00000',
-    fontWeight: 'bold',
-    fontSize: 16,
-  },
-  confirmButton: {
-    flex: 1,
-    backgroundColor: '#B00000',
-    paddingVertical: 12,
-    borderRadius: 8,
-    alignItems: 'center',
-  },
-  confirmButtonDisabled: {
-    backgroundColor: '#aaa',
-  },
-  confirmText: {
-    color: '#fff',
     fontWeight: 'bold',
     fontSize: 16,
   },

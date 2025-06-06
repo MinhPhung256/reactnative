@@ -29,10 +29,10 @@ const HealthDiary = () => {
       console.error("Lỗi khi tải nhật ký:", err);
 
       if (err.response && err.response.status === 401) {
-        Alert.alert('Phiên đăng nhập hết hạn', 'Vui lòng đăng nhập lại.');
-        // TODO: chuyển hướng về màn hình đăng nhập nếu có điều hướng
+        Alert.alert('Phiên đăng nhập hết hạn', 'Vui lòng đăng nhập lại');
+       
       } else {
-        Alert.alert('Lỗi', 'Không thể tải nhật ký.');
+        Alert.alert('Lỗi', 'Không thể tải nhật ký');
       }
       setDiary([]);
     } finally {
@@ -95,7 +95,7 @@ const HealthDiary = () => {
         try {
           await authApis(token).get(`${endpoints['healthdiary-list']}${editId}/`);
         } catch (checkErr) {
-          Alert.alert('Lỗi', 'Nhật ký này đã bị xoá hoặc không còn tồn tại.');
+          Alert.alert('Lỗi', 'Nhật ký này đã bị xoá hoặc không còn tồn tại');
           setEditId(null);
           setText('');
           setFeeling('');

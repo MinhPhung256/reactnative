@@ -4,7 +4,6 @@ import { Text, Button, TextInput, Dialog, Portal, List } from 'react-native-pape
 import { Calendar } from 'react-native-calendars';
 import { createOrUpdateWorkoutPlan } from '../../configs/Apis';
 
-
 const WorkoutPlan = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [workouts, setWorkouts] = useState({});
@@ -41,14 +40,14 @@ const WorkoutPlan = () => {
       const token = await AsyncStorage.getItem('token');
       await createOrUpdateWorkoutPlan(token, selectedDate, updatedWorkouts);
     } catch (error) {
-      Alert.alert("Lỗi", "Không thể lưu kế hoạch tập luyện");
+      // Alert.alert("Lỗi", "Không thể lưu kế hoạch tập luyện");
     }
   
     setCustomWorkout('');
     setDialogVisible(false);
   };
-  const removeCustomWorkout = (workout) => {
 
+  const removeWorkout = (workout) => {
     setCustomWorkouts(customWorkouts.filter(item => item !== workout));
 
     if (selectedDate && workouts[selectedDate]) {
@@ -109,7 +108,7 @@ const WorkoutPlan = () => {
                 >
                   <Text style={{ color: '#B00000', fontSize: 16 }}>{workout}</Text>
                   <Button
-                    onPress={() => removeCustomWorkout(workout)}
+                    onPress={() => removeWorkout(workout)}
                     textColor="#B00000"
                     compact
                     mode="text"
@@ -122,7 +121,7 @@ const WorkoutPlan = () => {
           )}
 
           <Button buttonColor="#B00000" textColor="white" mode="contained" onPress={() => setDialogVisible(true)} style={{ marginTop: 12 }}>
-            ➕ Tự thêm bài tập
+            ➕ Thêm bài tập
           </Button>
 
           <Text style={{ fontWeight: 'bold', marginTop: 20, color:'#B00000' }}>Danh sách bài tập:</Text>
@@ -132,9 +131,8 @@ const WorkoutPlan = () => {
         </View>
       ) : (
         <View>
-            <Text style={{ marginTop: 20, color: 'gray' }}>Vui lòng chọn ngày để xem hoặc thêm bài tập</Text>
+          <Text style={{ marginTop: 20, color: 'gray' }}>Vui lòng chọn ngày để xem hoặc thêm bài tập</Text>
         </View>
-        
       )}
 
       <Portal>

@@ -13,7 +13,7 @@ const ExpertDetail = ({ route }) => {
       <Text style={styles.sectionTitle}>Mô tả</Text>
       <Text style={styles.description}>{expert.description || 'Không có mô tả chi tiết.'}</Text>
 
-      {/* Bạn có thể thêm thông tin khác nếu có */}
+
     </ScrollView>
   );
 };

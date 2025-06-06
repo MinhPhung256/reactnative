@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { View, FlatList, StyleSheet, Text } from 'react-native';
 import { Card, RadioButton } from 'react-native-paper';
 
-// Dữ liệu giả lập theo định dạng của API
 const allMealPlans = {
   gain: [
     {

@@ -76,7 +76,7 @@ const ReminderScreen = () => {
           body: `Đến giờ cho hoạt động ${title}`,
           sound: true,
         },
-        trigger: new Date(triggerTimestamp),
+        trigger: { type: 'date', date: new Date(triggerTimestamp) },
       });
 
       const newReminder = {

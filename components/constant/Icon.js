@@ -34,14 +34,14 @@ export const iconList = [
     requiresLogin: true,
   },
   {
-    icon: 'food-apple',
+    icon: 'chat', 
     text: 'Gợi ý dinh dưỡng',
     screen: 'MealPlan',
     requiresLogin: true,
   },
   {
-    icon: 'calendar-clock',
-    text: 'Lịch tập mẫu',
+    icon: 'chart-line',  
+    text: 'Thống kê sức khoẻ',  
     screen: 'WorkoutPlan',
     requiresLogin: true,
   },

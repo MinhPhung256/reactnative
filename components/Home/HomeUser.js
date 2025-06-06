@@ -3,65 +3,13 @@ import { View, Text, Image, TouchableOpacity, ScrollView, StatusBar, SafeAreaVie
 import MyStyles from '../../styles/MyStyles';
 import ChooseRole from '../User/ChooseRole';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
-import { iconItems } from '../constant/Icon';
+import { iconList } from '../constant/Icon';
 import ActivityList from '../ActivityList';
-import { authApis, endpoints } from "../../configs/Apis";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 
 
 const HomeUser = ({ navigation }) => {
   const [showRole, setShowRole] = useState(false);
   const currentRole = 'user';
-
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
-
-
-  useFocusEffect(
-      useCallback(() => {
-        let isActive = true;
-  
-        const loadUser = async () => {
-          try {
-            setLoading(true);
-            const token = await AsyncStorage.getItem("token");
-            console.log("Token hiện tại:", token);
-            let res = await authApis(token).get(endpoints["current-user"]);
-            if (isActive) {
-              setUser(res.data);
-            }
-          } catch (err) {
-            console.error("Lỗi khi lấy thông tin user:", err);
-            if (isActive) setUser(null);
-          } finally {
-            if (isActive) setLoading(false);
-          }
-        };
-  
-        loadUser();
-  
-        return () => {
-          isActive = false; // cleanup tránh setState khi unmounted
-        };
-      }, [])
-    );
-
-    if (loading) {
-      return (
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="blue" />
-        </View>
-      );
-    }
-  
-    if (!user) {
-      return (
-        <View style={styles.center}>
-          <Text>Không thể tải thông tin người dùng.</Text>
-        </View>
-      );
-    }
-  
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: 'white' }}>
@@ -83,7 +31,7 @@ const HomeUser = ({ navigation }) => {
         </View>
 
         <View style={MyStyles.featuresContainer}>
-          {iconItems.map((item, index) => (
+          {iconList.map((item, index) => (
             <TouchableOpacity
               key={index}
               style={MyStyles.featureItem}
@@ -99,7 +47,7 @@ const HomeUser = ({ navigation }) => {
         
         <View>
           <Text style={{ color: '#B00000', textAlign: 'center', margin: 20,  fontWeight: 'bold' }}>
-            ------- Gợi ý các hoạt động -------
+            ------- Chuyên gia về dinh dưỡng -------
           </Text>
           <ActivityList navigation={navigation} />
         </View>

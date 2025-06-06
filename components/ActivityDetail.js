@@ -6,7 +6,7 @@ const ActivityDetail = ({ route, navigation }) => {
   const { activity } = route.params;
 
   const dateNow = new Date();
-  const formattedDate = dateNow.toLocaleDateString(); // vd: "17/05/2025"
+  const formattedDate = dateNow.toLocaleDateString(); 
   const timeRange = activity.subtitle;
 
   return (

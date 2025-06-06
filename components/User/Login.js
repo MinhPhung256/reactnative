@@ -65,7 +65,6 @@ const Login = () =>{
 
                 let form = qs.stringify({
                   ...user,
-
                   client_id: "5YvfnA8sN9VjLbzSemy8rogN5ObLK2CaWQbeFPhn",
                   client_secret: "eH0450aIFt6bPZBWQpfbWet8mdDB3cxAPWMwQyOaEhMqPbJUf1VfKRWXN0ofnI8DRNUDfzwukQv56x2Y9qFiUSdTcBYgJt3U9XMsErkNnDj4C9sMC4zPutDfTe6Gahb9",
                   grant_type: "password"
@@ -134,6 +133,8 @@ const Login = () =>{
             <Button style={{ backgroundColor: "#B00000" }} disabled={loading} loading={loading} onPress={login} mode="contained">
               Đăng nhập
             </Button>
+
+            
 
             <TouchableOpacity onPress={() => navigation.navigate('Register')}>
               <Text style={{ color: 'gray', textAlign: 'center', marginTop: 10 }}>

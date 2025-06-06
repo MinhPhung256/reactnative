@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { View, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { Card, Text, Button, Avatar } from 'react-native-paper';
-import { authApis, endpoints } from '../configs/Apis'; // Đảm bảo import đúng đường dẫn API của bạn
+import { authApis, endpoints } from '../configs/Apis'; 
 
-// Hàm tạo Icon trái cho mỗi activity
+
 const LeftContent = (icon) => (props) => <Avatar.Icon {...props} icon={icon} backgroundColor="#B00000" />;
 
 const ActivityCard = ({ activity, onPress }) => (
@@ -27,25 +27,31 @@ const ActivityList = ({ navigation, token }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Fetch activities from API
+
   useEffect(() => {
     const loadActivities = async () => {
       try {
-        const api = authApis(token);  // Sử dụng authApis đã tạo để gửi yêu cầu API
-        const response = await api.get(endpoints['activity-list']);  // Gọi API activity-list
-        setActivities(response.data.results);  // Lưu dữ liệu hoạt động vào state
+        const api = authApis(token); 
+        const response = await api.get(endpoints['activity-list']); 
+  
+        if (response.data && Array.isArray(response.data.results)) {
+          setActivities(response.data.results); 
+        } else {
+          setActivities([]); 
+        }
       } catch (err) {
         setError('Lỗi khi tải hoạt động.');
         console.error(err);
       } finally {
-        setLoading(false);  // Đóng trạng thái loading khi nhận được dữ liệu
+        setLoading(false);
       }
     };
+  
+    loadActivities(); 
+  
+  }, [token]);  
 
-    loadActivities();
-  }, [token]);  // Chạy lại khi token thay đổi
-
-  // Điều hướng đến màn hình chi tiết của hoạt động
+ 
   const onActivityPress = (activity) => {
     navigation.navigate('ActivityDetail', { activity });
   };
